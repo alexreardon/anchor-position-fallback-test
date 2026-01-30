@@ -1,0 +1,59 @@
+'use client';
+
+import { type ReactNode, type RefObject, useState } from 'react';
+import { Popover, type TPosition } from './popover';
+
+/**
+ * A tooltip component built on top of Popover.
+ * Shows on hover/focus of the trigger element.
+ */
+export function Tooltip({
+  triggerRef,
+  position,
+  children,
+  isOpen,
+  onOpenChange,
+}: {
+  triggerRef: RefObject<HTMLElement | null>;
+  position: TPosition;
+  children: ReactNode;
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
+}) {
+  if (!isOpen) {
+    return null;
+  }
+
+  return (
+    <Popover
+      triggerRef={triggerRef}
+      position={position}
+      linkToTrigger="description"
+      role="tooltip"
+      mode="auto"
+      onDismiss={() => onOpenChange(false)}
+    >
+      {children}
+    </Popover>
+  );
+}
+
+/**
+ * Hook to manage tooltip open/close state based on hover and focus.
+ */
+export function useTooltip() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const triggerProps = {
+    onMouseEnter: () => setIsOpen(true),
+    onMouseLeave: () => setIsOpen(false),
+    onFocus: () => setIsOpen(true),
+    onBlur: () => setIsOpen(false),
+  };
+
+  return {
+    isOpen,
+    setIsOpen,
+    triggerProps,
+  };
+}
