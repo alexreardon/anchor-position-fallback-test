@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRef, useState } from 'react';
 import type { TPosition } from '@/components/popover';
 import { Tooltip, useTooltip } from '@/components/tooltip';
@@ -93,6 +94,13 @@ export default function Home() {
         This popover component uses CSS Anchor Positioning when supported,
         with a JavaScript fallback for older browsers.
       </p>
+
+      <Link
+        href="/fallback-test"
+        className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+      >
+        Go to Fallback Positioning Test Page →
+      </Link>
     </div>
   );
 }
