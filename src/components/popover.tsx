@@ -57,6 +57,7 @@ export function Popover({
   role,
   mode,
   testId,
+  forceFallback = false,
   onDismiss,
 }: {
   ref?: Ref<HTMLDivElement>;
@@ -67,6 +68,8 @@ export function Popover({
   role: AriaRole;
   mode: TMode;
   testId?: string;
+  /** Force usage of JavaScript fallback positioning even when CSS Anchor Positioning is supported */
+  forceFallback?: boolean;
   onDismiss: () => void;
 }) {
   const ourRef = useRef<HTMLDivElement | null>(null);
@@ -88,10 +91,10 @@ export function Popover({
       setAttribute(trigger, { attribute: attribute[linkToTrigger], value: id }),
     );
 
-    // Check if CSS Anchor Positioning is supported
-    const hasNativeSupport = supportsAnchorPositioning();
+    // Check if CSS Anchor Positioning is supported (and not forced to use fallback)
+    const useNativePositioning = supportsAnchorPositioning() && !forceFallback;
 
-    if (hasNativeSupport) {
+    if (useNativePositioning) {
       // If the trigger already has an anchor name, we should
       // use it and not override it.
       // If we override an existing anchor name then the positioning
@@ -121,7 +124,7 @@ export function Popover({
     cleanupFns.push(() => popover.hidePopover());
 
     return combine(...cleanupFns);
-  }, [id, triggerRef, linkToTrigger, position]);
+  }, [id, triggerRef, linkToTrigger, position, forceFallback]);
 
   return (
     <div

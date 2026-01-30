@@ -1,6 +1,6 @@
+import { bindAll } from 'bind-event-listener';
 import type { TCleanupFn } from '@/types';
 import type { TPosition } from '@/components/popover';
-import { combine } from './combine';
 
 type TPlacement = 'top' | 'right' | 'bottom' | 'left';
 
@@ -37,14 +37,75 @@ function getPlacementFromPosition(
   position: TPosition,
   available: TAvailableSpace,
 ): TPlacement {
-  switch (position) {
-    case 'inline-end':
-      return getBestInlinePlacement(available);
-    case 'block-end':
-    case 'block-end-trigger-inline-start':
-      return getBestBlockPlacement(available);
-    default:
-      return 'bottom';
+  if (position === 'inline-end') {
+    return getBestInlinePlacement(available);
+  }
+
+  // 'block-end' and 'block-end-trigger-inline-start'
+  return getBestBlockPlacement(available);
+}
+
+function getHorizontalPosition(
+  position: TPosition,
+  triggerRect: DOMRect,
+  popoverRect: DOMRect,
+): number {
+  if (position === 'block-end-trigger-inline-start') {
+    return triggerRect.left;
+  }
+  // Center horizontally relative to trigger
+  const centerOffset = (triggerRect.width - popoverRect.width) / 2;
+  return triggerRect.left + centerOffset;
+}
+
+function applyPlacementStyles(
+  popover: HTMLElement,
+  placement: TPlacement,
+  position: TPosition,
+  triggerRect: DOMRect,
+  popoverRect: DOMRect,
+): void {
+  if (placement === 'top') {
+    popover.style.top = `${triggerRect.top - popoverRect.height - GAP}px`;
+    popover.style.left = `${getHorizontalPosition(position, triggerRect, popoverRect)}px`;
+    return;
+  }
+
+  if (placement === 'bottom') {
+    popover.style.top = `${triggerRect.bottom + GAP}px`;
+    popover.style.left = `${getHorizontalPosition(position, triggerRect, popoverRect)}px`;
+    return;
+  }
+
+  if (placement === 'left') {
+    popover.style.left = `${triggerRect.left - popoverRect.width - GAP}px`;
+    // Center vertically relative to trigger
+    const centerOffset = (triggerRect.height - popoverRect.height) / 2;
+    popover.style.top = `${triggerRect.top + centerOffset}px`;
+    return;
+  }
+
+  // placement === 'right'
+  popover.style.left = `${triggerRect.right + GAP}px`;
+  // Center vertically relative to trigger
+  const centerOffset = (triggerRect.height - popoverRect.height) / 2;
+  popover.style.top = `${triggerRect.top + centerOffset}px`;
+}
+
+function constrainToViewport(popover: HTMLElement): void {
+  const rect = popover.getBoundingClientRect();
+
+  if (rect.left < 0) {
+    popover.style.left = '0px';
+  }
+  if (rect.right > window.innerWidth) {
+    popover.style.left = `${window.innerWidth - rect.width}px`;
+  }
+  if (rect.top < 0) {
+    popover.style.top = '0px';
+  }
+  if (rect.bottom > window.innerHeight) {
+    popover.style.top = `${window.innerHeight - rect.height}px`;
   }
 }
 
@@ -67,59 +128,8 @@ function applyPlacement(
   // Apply fixed positioning relative to viewport
   popover.style.position = 'fixed';
 
-  switch (placement) {
-    case 'top': {
-      popover.style.top = `${triggerRect.top - popoverRect.height - GAP}px`;
-      if (position === 'block-end-trigger-inline-start') {
-        popover.style.left = `${triggerRect.left}px`;
-      } else {
-        // Center horizontally relative to trigger
-        const centerOffset = (triggerRect.width - popoverRect.width) / 2;
-        popover.style.left = `${triggerRect.left + centerOffset}px`;
-      }
-      break;
-    }
-    case 'bottom': {
-      popover.style.top = `${triggerRect.bottom + GAP}px`;
-      if (position === 'block-end-trigger-inline-start') {
-        popover.style.left = `${triggerRect.left}px`;
-      } else {
-        // Center horizontally relative to trigger
-        const centerOffset = (triggerRect.width - popoverRect.width) / 2;
-        popover.style.left = `${triggerRect.left + centerOffset}px`;
-      }
-      break;
-    }
-    case 'left': {
-      popover.style.left = `${triggerRect.left - popoverRect.width - GAP}px`;
-      // Center vertically relative to trigger
-      const centerOffsetLeft = (triggerRect.height - popoverRect.height) / 2;
-      popover.style.top = `${triggerRect.top + centerOffsetLeft}px`;
-      break;
-    }
-    case 'right': {
-      popover.style.left = `${triggerRect.right + GAP}px`;
-      // Center vertically relative to trigger
-      const centerOffsetRight = (triggerRect.height - popoverRect.height) / 2;
-      popover.style.top = `${triggerRect.top + centerOffsetRight}px`;
-      break;
-    }
-  }
-
-  // Ensure the popover stays within viewport bounds
-  const updatedRect = popover.getBoundingClientRect();
-  if (updatedRect.left < 0) {
-    popover.style.left = '0px';
-  }
-  if (updatedRect.right > window.innerWidth) {
-    popover.style.left = `${window.innerWidth - updatedRect.width}px`;
-  }
-  if (updatedRect.top < 0) {
-    popover.style.top = '0px';
-  }
-  if (updatedRect.bottom > window.innerHeight) {
-    popover.style.top = `${window.innerHeight - updatedRect.height}px`;
-  }
+  applyPlacementStyles(popover, placement, position, triggerRect, popoverRect);
+  constrainToViewport(popover);
 }
 
 /**
@@ -141,20 +151,9 @@ export function bindFallbackPositioning(
   // Initial positioning
   update();
 
-  // Re-run on scroll (using capture to catch all scroll events)
-  function onScroll() {
-    update();
-  }
-  window.addEventListener('scroll', onScroll, { capture: true, passive: true });
-
-  // Re-run on resize
-  function onResize() {
-    update();
-  }
-  window.addEventListener('resize', onResize, { passive: true });
-
-  return combine(
-    () => window.removeEventListener('scroll', onScroll, { capture: true }),
-    () => window.removeEventListener('resize', onResize),
-  );
+  // Re-run on scroll and resize
+  return bindAll(window, [
+    { type: 'scroll', listener: update, options: { capture: true, passive: true } },
+    { type: 'resize', listener: update, options: { passive: true } },
+  ]);
 }

@@ -14,6 +14,7 @@ export default function Home() {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { isOpen, setIsOpen, triggerProps } = useTooltip();
   const [position, setPosition] = useState<TPosition>('block-end');
+  const [forceFallback, setForceFallback] = useState(false);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-zinc-50 p-8 dark:bg-zinc-900">
@@ -45,6 +46,19 @@ export default function Home() {
             </select>
           </div>
 
+          {/* Force fallback checkbox */}
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={forceFallback}
+              onChange={(e) => setForceFallback(e.target.checked)}
+              className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-700"
+            />
+            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              Force JavaScript fallback positioning
+            </span>
+          </label>
+
           {/* Tooltip demo */}
           <div className="flex flex-col items-center gap-4 py-8">
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
@@ -64,6 +78,7 @@ export default function Home() {
               triggerRef={buttonRef}
               position={position}
               isOpen={isOpen}
+              forceFallback={forceFallback}
               onOpenChange={setIsOpen}
             >
               <span className="text-sm text-zinc-700 dark:text-zinc-300">

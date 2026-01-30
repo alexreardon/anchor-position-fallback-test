@@ -12,12 +12,15 @@ export function Tooltip({
   position,
   children,
   isOpen,
+  forceFallback,
   onOpenChange,
 }: {
   triggerRef: RefObject<HTMLElement | null>;
   position: TPosition;
   children: ReactNode;
   isOpen: boolean;
+  /** Force usage of JavaScript fallback positioning even when CSS Anchor Positioning is supported */
+  forceFallback?: boolean;
   onOpenChange: (isOpen: boolean) => void;
 }) {
   if (!isOpen) {
@@ -31,6 +34,7 @@ export function Tooltip({
       linkToTrigger="description"
       role="tooltip"
       mode="auto"
+      forceFallback={forceFallback}
       onDismiss={() => onOpenChange(false)}
     >
       {children}
