@@ -25,7 +25,10 @@ type AnimationStyle =
   | 'grow-from-anchor'
   | 'glitch'
   | 'swing'
-  | 'unfold';
+  | 'unfold'
+  | 'liquid-glass'
+  | 'liquid-morph'
+  | 'prismatic';
 
 const animations: { id: AnimationStyle; name: string; description: string }[] = [
   { id: 'fade', name: 'Fade', description: 'Simple opacity fade in/out' },
@@ -44,6 +47,9 @@ const animations: { id: AnimationStyle; name: string; description: string }[] = 
   { id: 'glitch', name: 'Glitch', description: 'Digital glitch effect' },
   { id: 'swing', name: 'Swing', description: 'Pendulum swing entrance' },
   { id: 'unfold', name: 'Unfold', description: 'Paper unfold effect' },
+  { id: 'liquid-glass', name: 'Liquid Glass', description: 'Apple-style frosted glass with fluid motion' },
+  { id: 'liquid-morph', name: 'Liquid Morph', description: 'Morphing blob-like appearance' },
+  { id: 'prismatic', name: 'Prismatic', description: 'Light refraction with color separation' },
 ];
 
 const menuItems = [
@@ -151,7 +157,7 @@ function DropdownDemo({ animation }: { animation: AnimationStyle }) {
           className="trigger-button"
           aria-haspopup="menu"
         >
-          <span>Options</span>
+          <span>Show dropdown</span>
           <svg
             className={`chevron ${isOpen ? 'open' : ''}`}
             viewBox="0 0 20 20"
@@ -395,13 +401,12 @@ const animationStyles = `
     border: none;
     border-radius: 0.5rem;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: background 0.2s;
     box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
   }
 
   .trigger-button:hover {
     background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
   }
 
   .trigger-button:focus-visible {
@@ -995,5 +1000,205 @@ const animationStyles = `
     padding: 0.125rem 0.375rem;
     border-radius: 0.25rem;
     font-size: 0.875em;
+  }
+
+  /* ===== Animation: Liquid Glass ===== */
+  .dropdown-liquid-glass {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.1),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+      inset 0 2px 4px rgba(255, 255, 255, 0.4);
+    animation: liquidGlassIn 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  @keyframes liquidGlassIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.95) translateY(-10px);
+      backdrop-filter: blur(0px) saturate(100%);
+      -webkit-backdrop-filter: blur(0px) saturate(100%);
+    }
+    50% {
+      backdrop-filter: blur(25px) saturate(200%);
+      -webkit-backdrop-filter: blur(25px) saturate(200%);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+    }
+  }
+
+  @starting-style {
+    .dropdown-liquid-glass:popover-open {
+      opacity: 0;
+      transform: scale(0.95) translateY(-10px);
+    }
+  }
+
+  .dropdown-liquid-glass:not(:popover-open) {
+    opacity: 0;
+    transform: scale(0.98) translateY(-5px);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    transition-duration: 0.25s;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .dropdown-liquid-glass {
+      background: rgba(31, 41, 55, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+        inset 0 2px 4px rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  /* ===== Animation: Liquid Morph ===== */
+  .dropdown-liquid-morph {
+    opacity: 1;
+    border-radius: 0.75rem;
+    animation: liquidMorphIn 0.6s ease-out;
+  }
+
+  @keyframes liquidMorphIn {
+    0% {
+      opacity: 0;
+      border-radius: 50%;
+      transform: scale(0.3);
+      filter: blur(10px);
+    }
+    30% {
+      border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+      transform: scale(0.7);
+      filter: blur(5px);
+    }
+    50% {
+      border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+      transform: scale(0.9);
+      filter: blur(2px);
+    }
+    70% {
+      border-radius: 40% 60% 50% 50% / 50% 50% 50% 50%;
+      transform: scale(1.02);
+      filter: blur(0px);
+    }
+    100% {
+      opacity: 1;
+      border-radius: 0.75rem;
+      transform: scale(1);
+      filter: blur(0px);
+    }
+  }
+
+  @starting-style {
+    .dropdown-liquid-morph:popover-open {
+      opacity: 0;
+      transform: scale(0.3);
+      border-radius: 50%;
+    }
+  }
+
+  .dropdown-liquid-morph:not(:popover-open) {
+    opacity: 0;
+    transform: scale(0.5);
+    border-radius: 50%;
+    filter: blur(5px);
+    transition-duration: 0.2s;
+  }
+
+  /* ===== Animation: Prismatic ===== */
+  .dropdown-prismatic {
+    opacity: 1;
+    transform: scale(1);
+    position: relative;
+    animation: prismaticIn 0.5s ease-out;
+    box-shadow:
+      -2px 0 8px rgba(255, 0, 0, 0.2),
+      2px 0 8px rgba(0, 0, 255, 0.2),
+      0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+
+  .dropdown-prismatic::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 0, 0, 0.05) 0%,
+      rgba(255, 255, 0, 0.05) 25%,
+      rgba(0, 255, 0, 0.05) 50%,
+      rgba(0, 255, 255, 0.05) 75%,
+      rgba(0, 0, 255, 0.05) 100%
+    );
+    opacity: 0;
+    animation: prismaticShimmer 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .dropdown-prismatic:popover-open::before {
+    opacity: 1;
+  }
+
+  @keyframes prismaticIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.9) rotate(-2deg);
+      box-shadow:
+        -10px 0 20px rgba(255, 0, 0, 0.4),
+        10px 0 20px rgba(0, 0, 255, 0.4),
+        0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+      box-shadow:
+        -5px 0 15px rgba(255, 0, 0, 0.3),
+        5px 0 15px rgba(0, 0, 255, 0.3),
+        0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+      box-shadow:
+        -2px 0 8px rgba(255, 0, 0, 0.2),
+        2px 0 8px rgba(0, 0, 255, 0.2),
+        0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  @keyframes prismaticShimmer {
+    0%, 100% {
+      background-position: 0% 50%;
+      filter: hue-rotate(0deg);
+    }
+    50% {
+      background-position: 100% 50%;
+      filter: hue-rotate(30deg);
+    }
+  }
+
+  @starting-style {
+    .dropdown-prismatic:popover-open {
+      opacity: 0;
+      transform: scale(0.9) rotate(-2deg);
+    }
+  }
+
+  .dropdown-prismatic:not(:popover-open) {
+    opacity: 0;
+    transform: scale(0.95);
+    box-shadow:
+      -8px 0 16px rgba(255, 0, 0, 0.3),
+      8px 0 16px rgba(0, 0, 255, 0.3),
+      0 4px 16px rgba(0, 0, 0, 0.1);
+    transition-duration: 0.2s;
   }
 `;
