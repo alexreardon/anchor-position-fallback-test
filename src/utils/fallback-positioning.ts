@@ -45,68 +45,56 @@ function getPlacementFromPosition(
   return getBestBlockPlacement(available);
 }
 
-function getHorizontalPosition(
-  position: TPosition,
-  triggerRect: DOMRect,
-  popoverRect: DOMRect,
-): number {
-  if (position === 'block-end-trigger-inline-start') {
-    return triggerRect.left;
-  }
-  // Center horizontally relative to trigger
-  const centerOffset = (triggerRect.width - popoverRect.width) / 2;
-  return triggerRect.left + centerOffset;
-}
-
+/**
+ * Apply placement using CSS transforms so we don't need to measure the popover.
+ * The transform handles offsetting by the popover's own dimensions.
+ */
 function applyPlacementStyles(
   popover: HTMLElement,
   placement: TPlacement,
   position: TPosition,
   triggerRect: DOMRect,
-  popoverRect: DOMRect,
 ): void {
   if (placement === 'top') {
-    popover.style.top = `${triggerRect.top - popoverRect.height - GAP}px`;
-    popover.style.left = `${getHorizontalPosition(position, triggerRect, popoverRect)}px`;
+    // Position at trigger's top edge, transform moves it up by its own height
+    popover.style.top = `${triggerRect.top - GAP}px`;
+    if (position === 'block-end-trigger-inline-start') {
+      popover.style.left = `${triggerRect.left}px`;
+      popover.style.transform = 'translateY(-100%)';
+    } else {
+      // Center horizontally: position at trigger center, transform centers it
+      popover.style.left = `${triggerRect.left + triggerRect.width / 2}px`;
+      popover.style.transform = 'translate(-50%, -100%)';
+    }
     return;
   }
 
   if (placement === 'bottom') {
     popover.style.top = `${triggerRect.bottom + GAP}px`;
-    popover.style.left = `${getHorizontalPosition(position, triggerRect, popoverRect)}px`;
+    if (position === 'block-end-trigger-inline-start') {
+      popover.style.left = `${triggerRect.left}px`;
+    } else {
+      // Center horizontally
+      popover.style.left = `${triggerRect.left + triggerRect.width / 2}px`;
+      popover.style.transform = 'translateX(-50%)';
+    }
     return;
   }
 
   if (placement === 'left') {
-    popover.style.left = `${triggerRect.left - popoverRect.width - GAP}px`;
-    // Center vertically relative to trigger
-    const centerOffset = (triggerRect.height - popoverRect.height) / 2;
-    popover.style.top = `${triggerRect.top + centerOffset}px`;
+    // Position at trigger's left edge, transform moves it left by its own width
+    popover.style.left = `${triggerRect.left - GAP}px`;
+    // Center vertically: position at trigger center, transform centers it
+    popover.style.top = `${triggerRect.top + triggerRect.height / 2}px`;
+    popover.style.transform = 'translate(-100%, -50%)';
     return;
   }
 
   // placement === 'right'
   popover.style.left = `${triggerRect.right + GAP}px`;
-  // Center vertically relative to trigger
-  const centerOffset = (triggerRect.height - popoverRect.height) / 2;
-  popover.style.top = `${triggerRect.top + centerOffset}px`;
-}
-
-function constrainToViewport(popover: HTMLElement): void {
-  const rect = popover.getBoundingClientRect();
-
-  if (rect.left < 0) {
-    popover.style.left = '0px';
-  }
-  if (rect.right > window.innerWidth) {
-    popover.style.left = `${window.innerWidth - rect.width}px`;
-  }
-  if (rect.top < 0) {
-    popover.style.top = '0px';
-  }
-  if (rect.bottom > window.innerHeight) {
-    popover.style.top = `${window.innerHeight - rect.height}px`;
-  }
+  // Center vertically
+  popover.style.top = `${triggerRect.top + triggerRect.height / 2}px`;
+  popover.style.transform = 'translateY(-50%)';
 }
 
 function applyPlacement(
@@ -115,21 +103,18 @@ function applyPlacement(
   position: TPosition,
 ): void {
   const triggerRect = trigger.getBoundingClientRect();
-  const popoverRect = popover.getBoundingClientRect();
   const available = getAvailableSpace(triggerRect);
   const placement = getPlacementFromPosition(position, available);
 
   // Reset any previous positioning
   popover.style.top = '';
   popover.style.left = '';
-  popover.style.right = '';
-  popover.style.bottom = '';
+  popover.style.transform = '';
 
   // Apply fixed positioning relative to viewport
   popover.style.position = 'fixed';
 
-  applyPlacementStyles(popover, placement, position, triggerRect, popoverRect);
-  constrainToViewport(popover);
+  applyPlacementStyles(popover, placement, position, triggerRect);
 }
 
 /**
@@ -148,7 +133,8 @@ export function bindFallbackPositioning(
     applyPlacement(popover, trigger, position);
   }
 
-  // Initial positioning
+  // Initial positioning (no need to wait - we use CSS transforms
+  // so we don't need to measure the popover's dimensions)
   update();
 
   // Re-run on scroll and resize
