@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRef, useState } from 'react';
-import type { TPosition } from '@/components/popover';
+import type { TPosition, TFallbackStrategy } from '@/components/popover';
 import { Tooltip, useTooltip } from '@/components/tooltip';
 
 const positions: { value: TPosition; label: string }[] = [
@@ -11,14 +11,19 @@ const positions: { value: TPosition; label: string }[] = [
   { value: 'block-end-trigger-inline-start', label: 'Bottom Left' },
 ];
 
+const fallbackStrategies: { value: TFallbackStrategy; label: string }[] = [
+  { value: 'update-on-change', label: 'Update on change' },
+  { value: 'update-each-frame', label: 'Update each frame' },
+];
+
 function TooltipButton({
   label,
   position,
-  forceFallback,
+  fallbackStrategy,
 }: {
   label: string;
   position: TPosition;
-  forceFallback: boolean;
+  fallbackStrategy: TFallbackStrategy | undefined;
 }) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { isOpen, setIsOpen, triggerProps } = useTooltip();
@@ -37,7 +42,7 @@ function TooltipButton({
         triggerRef={buttonRef}
         position={position}
         isOpen={isOpen}
-        forceFallback={forceFallback}
+        fallbackStrategy={fallbackStrategy}
         onOpenChange={setIsOpen}
       >
         <span className="text-sm text-zinc-700 dark:text-zinc-300">
@@ -51,6 +56,9 @@ function TooltipButton({
 export default function FallbackTestPage() {
   const [position, setPosition] = useState<TPosition>('block-end');
   const [forceFallback, setForceFallback] = useState(true);
+  const [fallbackStrategy, setFallbackStrategy] = useState<TFallbackStrategy>('update-on-change');
+
+  const effectiveFallbackStrategy = forceFallback ? fallbackStrategy : undefined;
 
   return (
     <div className="min-h-[300vh] bg-zinc-50 p-8 dark:bg-zinc-900">
@@ -60,17 +68,20 @@ export default function FallbackTestPage() {
           Controls
         </h2>
         <div className="flex flex-col gap-3">
-          <select
-            value={position}
-            onChange={(e) => setPosition(e.target.value as TPosition)}
-            className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm text-zinc-900 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
-          >
-            {positions.map((pos) => (
-              <option key={pos.value} value={pos.value}>
-                {pos.label}
-              </option>
-            ))}
-          </select>
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-zinc-500 dark:text-zinc-400">Position</span>
+            <select
+              value={position}
+              onChange={(e) => setPosition(e.target.value as TPosition)}
+              className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm text-zinc-900 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
+            >
+              {positions.map((pos) => (
+                <option key={pos.value} value={pos.value}>
+                  {pos.label}
+                </option>
+              ))}
+            </select>
+          </div>
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -82,6 +93,21 @@ export default function FallbackTestPage() {
               Force fallback
             </span>
           </label>
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-zinc-500 dark:text-zinc-400">Fallback Strategy</span>
+            <select
+              value={fallbackStrategy}
+              onChange={(e) => setFallbackStrategy(e.target.value as TFallbackStrategy)}
+              disabled={!forceFallback}
+              className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm text-zinc-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
+            >
+              {fallbackStrategies.map((strategy) => (
+                <option key={strategy.value} value={strategy.value}>
+                  {strategy.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -110,9 +136,9 @@ export default function FallbackTestPage() {
           Hover over buttons while scrolling the page. The tooltips should follow.
         </p>
         <div className="flex flex-wrap gap-4">
-          <TooltipButton label="Button 1" position={position} forceFallback={forceFallback} />
-          <TooltipButton label="Button 2" position={position} forceFallback={forceFallback} />
-          <TooltipButton label="Button 3" position={position} forceFallback={forceFallback} />
+          <TooltipButton label="Button 1" position={position} fallbackStrategy={effectiveFallbackStrategy} />
+          <TooltipButton label="Button 2" position={position} fallbackStrategy={effectiveFallbackStrategy} />
+          <TooltipButton label="Button 3" position={position} fallbackStrategy={effectiveFallbackStrategy} />
         </div>
       </section>
 
@@ -128,28 +154,28 @@ export default function FallbackTestPage() {
           <div className="h-[600px] space-y-8 p-4">
             <div className="flex items-center gap-4">
               <span className="text-sm text-zinc-500">Top of container:</span>
-              <TooltipButton label="Top Button" position={position} forceFallback={forceFallback} />
+              <TooltipButton label="Top Button" position={position} fallbackStrategy={effectiveFallbackStrategy} />
             </div>
 
             <div className="h-32" />
 
             <div className="flex items-center gap-4">
               <span className="text-sm text-zinc-500">Middle:</span>
-              <TooltipButton label="Middle Button" position={position} forceFallback={forceFallback} />
+              <TooltipButton label="Middle Button" position={position} fallbackStrategy={effectiveFallbackStrategy} />
             </div>
 
             <div className="h-32" />
 
             <div className="flex items-center gap-4">
               <span className="text-sm text-zinc-500">Lower middle:</span>
-              <TooltipButton label="Lower Button" position={position} forceFallback={forceFallback} />
+              <TooltipButton label="Lower Button" position={position} fallbackStrategy={effectiveFallbackStrategy} />
             </div>
 
             <div className="h-32" />
 
             <div className="flex items-center gap-4">
               <span className="text-sm text-zinc-500">Bottom of container:</span>
-              <TooltipButton label="Bottom Button" position={position} forceFallback={forceFallback} />
+              <TooltipButton label="Bottom Button" position={position} fallbackStrategy={effectiveFallbackStrategy} />
             </div>
           </div>
         </div>
@@ -166,35 +192,35 @@ export default function FallbackTestPage() {
         <div className="grid grid-cols-3 gap-4">
           {/* Top row */}
           <div className="flex justify-start">
-            <TooltipButton label="Top Left" position={position} forceFallback={forceFallback} />
+            <TooltipButton label="Top Left" position={position} fallbackStrategy={effectiveFallbackStrategy} />
           </div>
           <div className="flex justify-center">
-            <TooltipButton label="Top Center" position={position} forceFallback={forceFallback} />
+            <TooltipButton label="Top Center" position={position} fallbackStrategy={effectiveFallbackStrategy} />
           </div>
           <div className="flex justify-end">
-            <TooltipButton label="Top Right" position={position} forceFallback={forceFallback} />
+            <TooltipButton label="Top Right" position={position} fallbackStrategy={effectiveFallbackStrategy} />
           </div>
 
           {/* Middle row */}
           <div className="flex justify-start py-16">
-            <TooltipButton label="Middle Left" position={position} forceFallback={forceFallback} />
+            <TooltipButton label="Middle Left" position={position} fallbackStrategy={effectiveFallbackStrategy} />
           </div>
           <div className="flex justify-center py-16">
-            <TooltipButton label="Center" position={position} forceFallback={forceFallback} />
+            <TooltipButton label="Center" position={position} fallbackStrategy={effectiveFallbackStrategy} />
           </div>
           <div className="flex justify-end py-16">
-            <TooltipButton label="Middle Right" position={position} forceFallback={forceFallback} />
+            <TooltipButton label="Middle Right" position={position} fallbackStrategy={effectiveFallbackStrategy} />
           </div>
 
           {/* Bottom row */}
           <div className="flex justify-start">
-            <TooltipButton label="Bottom Left" position={position} forceFallback={forceFallback} />
+            <TooltipButton label="Bottom Left" position={position} fallbackStrategy={effectiveFallbackStrategy} />
           </div>
           <div className="flex justify-center">
-            <TooltipButton label="Bottom Center" position={position} forceFallback={forceFallback} />
+            <TooltipButton label="Bottom Center" position={position} fallbackStrategy={effectiveFallbackStrategy} />
           </div>
           <div className="flex justify-end">
-            <TooltipButton label="Bottom Right" position={position} forceFallback={forceFallback} />
+            <TooltipButton label="Bottom Right" position={position} fallbackStrategy={effectiveFallbackStrategy} />
           </div>
         </div>
       </section>
@@ -205,7 +231,7 @@ export default function FallbackTestPage() {
           <p className="text-zinc-400 dark:text-zinc-500 mb-4">
             More content to enable scrolling...
           </p>
-          <TooltipButton label="Far Down Button" position={position} forceFallback={forceFallback} />
+          <TooltipButton label="Far Down Button" position={position} fallbackStrategy={effectiveFallbackStrategy} />
         </div>
       </div>
 
@@ -221,22 +247,22 @@ export default function FallbackTestPage() {
           <div className="w-[200%] p-4">
             <div className="flex gap-8">
               <div className="flex-shrink-0">
-                <TooltipButton label="Nested 1" position={position} forceFallback={forceFallback} />
+                <TooltipButton label="Nested 1" position={position} fallbackStrategy={effectiveFallbackStrategy} />
               </div>
               <div className="flex-shrink-0">
-                <TooltipButton label="Nested 2" position={position} forceFallback={forceFallback} />
+                <TooltipButton label="Nested 2" position={position} fallbackStrategy={effectiveFallbackStrategy} />
               </div>
               <div className="flex-shrink-0">
-                <TooltipButton label="Nested 3" position={position} forceFallback={forceFallback} />
+                <TooltipButton label="Nested 3" position={position} fallbackStrategy={effectiveFallbackStrategy} />
               </div>
               <div className="flex-shrink-0">
-                <TooltipButton label="Nested 4" position={position} forceFallback={forceFallback} />
+                <TooltipButton label="Nested 4" position={position} fallbackStrategy={effectiveFallbackStrategy} />
               </div>
               <div className="flex-shrink-0">
-                <TooltipButton label="Nested 5" position={position} forceFallback={forceFallback} />
+                <TooltipButton label="Nested 5" position={position} fallbackStrategy={effectiveFallbackStrategy} />
               </div>
               <div className="flex-shrink-0">
-                <TooltipButton label="Nested 6" position={position} forceFallback={forceFallback} />
+                <TooltipButton label="Nested 6" position={position} fallbackStrategy={effectiveFallbackStrategy} />
               </div>
             </div>
           </div>

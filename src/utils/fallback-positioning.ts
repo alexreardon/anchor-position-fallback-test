@@ -117,14 +117,13 @@ function applyPlacement(
   applyPlacementStyles(popover, placement, position, triggerRect);
 }
 
+export type TFallbackStrategy = 'update-on-change' | 'update-each-frame';
+
 /**
- * Provides JavaScript-based positioning as a fallback for browsers
- * that don't support CSS Anchor Positioning.
- *
- * This runs the placement algorithm when the popover opens and
- * re-runs it on scroll and resize events.
+ * Fallback positioning that updates on scroll and resize events.
+ * More efficient but may miss some edge cases.
  */
-export function bindFallbackPositioning(
+function bindUpdateOnChange(
   popover: HTMLElement,
   trigger: HTMLElement,
   position: TPosition,
@@ -133,13 +132,54 @@ export function bindFallbackPositioning(
     applyPlacement(popover, trigger, position);
   }
 
-  // Initial positioning (no need to wait - we use CSS transforms
-  // so we don't need to measure the popover's dimensions)
   update();
 
-  // Re-run on scroll and resize
   return bindAll(window, [
     { type: 'scroll', listener: update, options: { capture: true, passive: true } },
     { type: 'resize', listener: update, options: { passive: true } },
   ]);
+}
+
+/**
+ * Fallback positioning that updates on every animation frame.
+ * More reliable but uses more resources.
+ */
+function bindUpdateEachFrame(
+  popover: HTMLElement,
+  trigger: HTMLElement,
+  position: TPosition,
+): TCleanupFn {
+  let frameId: number;
+  let isRunning = true;
+
+  function update() {
+    applyPlacement(popover, trigger, position);
+    if (isRunning) {
+      frameId = requestAnimationFrame(update);
+    }
+  }
+
+  frameId = requestAnimationFrame(update);
+
+  return function cleanup() {
+    isRunning = false;
+    cancelAnimationFrame(frameId);
+  };
+}
+
+/**
+ * Provides JavaScript-based positioning as a fallback for browsers
+ * that don't support CSS Anchor Positioning.
+ */
+export function bindFallbackPositioning(
+  popover: HTMLElement,
+  trigger: HTMLElement,
+  position: TPosition,
+  strategy: TFallbackStrategy = 'update-on-change',
+): TCleanupFn {
+  if (strategy === 'update-each-frame') {
+    return bindUpdateEachFrame(popover, trigger, position);
+  }
+
+  return bindUpdateOnChange(popover, trigger, position);
 }

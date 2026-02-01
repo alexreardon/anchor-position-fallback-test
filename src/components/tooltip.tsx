@@ -1,7 +1,7 @@
 'use client';
 
 import { type ReactNode, type RefObject, useState } from 'react';
-import { Popover, type TPosition } from './popover';
+import { Popover, type TPosition, type TFallbackStrategy } from './popover';
 
 /**
  * A tooltip component built on top of Popover.
@@ -12,15 +12,15 @@ export function Tooltip({
   position,
   children,
   isOpen,
-  forceFallback,
+  fallbackStrategy,
   onOpenChange,
 }: {
   triggerRef: RefObject<HTMLElement | null>;
   position: TPosition;
   children: ReactNode;
   isOpen: boolean;
-  /** Force usage of JavaScript fallback positioning even when CSS Anchor Positioning is supported */
-  forceFallback?: boolean;
+  /** Force usage of a specific JavaScript fallback strategy */
+  fallbackStrategy?: TFallbackStrategy;
   onOpenChange: (isOpen: boolean) => void;
 }) {
   if (!isOpen) {
@@ -34,7 +34,7 @@ export function Tooltip({
       linkToTrigger="description"
       role="tooltip"
       mode="auto"
-      forceFallback={forceFallback}
+      fallbackStrategy={fallbackStrategy}
       onDismiss={() => onOpenChange(false)}
     >
       {children}

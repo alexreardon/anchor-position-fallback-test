@@ -19,9 +19,10 @@ import { setAttribute } from '@/utils/set-attribute';
 import { setStyle } from '@/utils/set-style';
 import { tw } from '@/utils/tw';
 import { supportsAnchorPositioning } from '@/utils/supports-anchor-positioning';
-import { bindFallbackPositioning } from '@/utils/fallback-positioning';
+import { bindFallbackPositioning, type TFallbackStrategy } from '@/utils/fallback-positioning';
 
 export type TPosition = 'inline-end' | 'block-end' | 'block-end-trigger-inline-start';
+export type { TFallbackStrategy } from '@/utils/fallback-positioning';
 
 type TLinkToTrigger = 'name' | 'description';
 type TMode = Exclude<HTMLAttributes<HTMLDivElement>['popover'], '' | undefined>;
@@ -57,7 +58,7 @@ export function Popover({
   role,
   mode,
   testId,
-  forceFallback = false,
+  fallbackStrategy,
   onDismiss,
 }: {
   ref?: Ref<HTMLDivElement>;
@@ -68,8 +69,8 @@ export function Popover({
   role: AriaRole;
   mode: TMode;
   testId?: string;
-  /** Force usage of JavaScript fallback positioning even when CSS Anchor Positioning is supported */
-  forceFallback?: boolean;
+  /** Force usage of a specific JavaScript fallback strategy. If not set, uses native CSS Anchor Positioning when supported. */
+  fallbackStrategy?: TFallbackStrategy;
   onDismiss: () => void;
 }) {
   const ourRef = useRef<HTMLDivElement | null>(null);
@@ -91,8 +92,8 @@ export function Popover({
       setAttribute(trigger, { attribute: attribute[linkToTrigger], value: id }),
     );
 
-    // Check if CSS Anchor Positioning is supported (and not forced to use fallback)
-    const useNativePositioning = supportsAnchorPositioning() && !forceFallback;
+    // Use native CSS Anchor Positioning if supported and no fallback strategy is forced
+    const useNativePositioning = supportsAnchorPositioning() && !fallbackStrategy;
 
     if (useNativePositioning) {
       // If the trigger already has an anchor name, we should
@@ -116,7 +117,8 @@ export function Popover({
       popover.classList.add(...anchorPositionStyles[position].split(' ').filter(Boolean));
     } else {
       // Use JavaScript fallback for positioning
-      cleanupFns.push(bindFallbackPositioning(popover, trigger, position));
+      const strategy = fallbackStrategy ?? 'update-on-change';
+      cleanupFns.push(bindFallbackPositioning(popover, trigger, position, strategy));
     }
 
     // Show the popover
@@ -124,7 +126,7 @@ export function Popover({
     cleanupFns.push(() => popover.hidePopover());
 
     return combine(...cleanupFns);
-  }, [id, triggerRef, linkToTrigger, position, forceFallback]);
+  }, [id, triggerRef, linkToTrigger, position, fallbackStrategy]);
 
   return (
     <div

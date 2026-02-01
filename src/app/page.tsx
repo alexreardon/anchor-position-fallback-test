@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRef, useState } from 'react';
-import type { TPosition } from '@/components/popover';
+import type { TPosition, TFallbackStrategy } from '@/components/popover';
 import { Tooltip, useTooltip } from '@/components/tooltip';
 
 const positions: { value: TPosition; label: string }[] = [
@@ -11,11 +11,17 @@ const positions: { value: TPosition; label: string }[] = [
   { value: 'block-end-trigger-inline-start', label: 'Bottom Left (block-end-trigger-inline-start)' },
 ];
 
+const fallbackStrategies: { value: TFallbackStrategy; label: string }[] = [
+  { value: 'update-on-change', label: 'Update on change' },
+  { value: 'update-each-frame', label: 'Update each frame' },
+];
+
 export default function Home() {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { isOpen, setIsOpen, triggerProps } = useTooltip();
   const [position, setPosition] = useState<TPosition>('block-end');
   const [forceFallback, setForceFallback] = useState(false);
+  const [fallbackStrategy, setFallbackStrategy] = useState<TFallbackStrategy>('update-on-change');
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-zinc-50 p-8 dark:bg-zinc-900">
@@ -47,18 +53,44 @@ export default function Home() {
             </select>
           </div>
 
-          {/* Force fallback checkbox */}
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={forceFallback}
-              onChange={(e) => setForceFallback(e.target.checked)}
-              className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-700"
-            />
-            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Force JavaScript fallback positioning
-            </span>
-          </label>
+          {/* Force fallback section */}
+          <div className="flex flex-col gap-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-700">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={forceFallback}
+                onChange={(e) => setForceFallback(e.target.checked)}
+                className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-700"
+              />
+              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Force JavaScript fallback
+              </span>
+            </label>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              Use fallback positioning even when CSS Anchor Positioning is supported
+            </p>
+            <div className="flex flex-col gap-2">
+              <label
+                htmlFor="fallback-strategy-select"
+                className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              >
+                Fallback Strategy
+              </label>
+              <select
+                id="fallback-strategy-select"
+                value={fallbackStrategy}
+                onChange={(e) => setFallbackStrategy(e.target.value as TFallbackStrategy)}
+                disabled={!forceFallback}
+                className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-zinc-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
+              >
+                {fallbackStrategies.map((strategy) => (
+                  <option key={strategy.value} value={strategy.value}>
+                    {strategy.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
           {/* Tooltip demo */}
           <div className="flex flex-col items-center gap-4 py-8">
@@ -79,7 +111,7 @@ export default function Home() {
               triggerRef={buttonRef}
               position={position}
               isOpen={isOpen}
-              forceFallback={forceFallback}
+              fallbackStrategy={forceFallback ? fallbackStrategy : undefined}
               onOpenChange={setIsOpen}
             >
               <span className="text-sm text-zinc-700 dark:text-zinc-300">
