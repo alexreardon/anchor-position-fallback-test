@@ -117,7 +117,7 @@ export default function FallbackTestPage() {
           href="/"
           className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
         >
-          ← Back to Demo
+          ← Back to Home
         </Link>
         <h1 className="mt-2 text-2xl font-bold text-zinc-900 dark:text-zinc-100">
           Fallback Positioning Test

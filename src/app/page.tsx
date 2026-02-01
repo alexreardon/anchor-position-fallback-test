@@ -16,6 +16,19 @@ const fallbackStrategies: { value: TFallbackStrategy; label: string }[] = [
   { value: 'update-each-frame', label: 'Update each frame' },
 ];
 
+const demos: { href: string; title: string; description: string }[] = [
+  {
+    href: '/fallback-test',
+    title: 'Fallback Positioning Test',
+    description: 'Test tooltip positioning with page scroll, scroll containers, and edge cases.',
+  },
+  {
+    href: '/animations-demo',
+    title: 'Dropdown Animation Showcase',
+    description: 'Explore 16 different entrance and exit animations for top layer dropdown menus.',
+  },
+];
+
 export default function Home() {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { isOpen, setIsOpen, triggerProps } = useTooltip();
@@ -127,12 +140,33 @@ export default function Home() {
         with a JavaScript fallback for older browsers.
       </p>
 
-      <Link
-        href="/fallback-test"
-        className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-      >
-        Go to Fallback Positioning Test Page →
-      </Link>
+      {/* Demos section */}
+      <div className="w-full max-w-md">
+        <h2 className="mb-4 text-center text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+          Demos
+        </h2>
+        <div className="flex flex-col gap-3">
+          {demos.map((demo) => (
+            <Link
+              key={demo.href}
+              href={demo.href}
+              className="group rounded-lg border border-zinc-200 bg-white p-4 shadow-sm transition-all hover:border-blue-300 hover:shadow-md dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-blue-600"
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium text-zinc-900 group-hover:text-blue-600 dark:text-zinc-100 dark:group-hover:text-blue-400">
+                  {demo.title}
+                </h3>
+                <span className="text-zinc-400 transition-transform group-hover:translate-x-1">
+                  →
+                </span>
+              </div>
+              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                {demo.description}
+              </p>
+            </Link>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
