@@ -1,8 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { useRef, useState, useId, useLayoutEffect, type ReactNode } from 'react';
 import invariant from 'tiny-invariant';
+import { ArrowRight, AlertTriangle, Info, ChevronDown } from 'lucide-react';
 import { combine } from '@/utils/combine';
 import { setStyle } from '@/utils/set-style';
 import { setAttribute } from '@/utils/set-attribute';
@@ -174,7 +174,7 @@ export default function ArrowsDemoPage() {
   const effectiveFallbackStrategy = forceFallback ? fallbackStrategy : undefined;
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 p-8 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-full overflow-auto bg-linear-to-br from-gray-50 to-gray-100 p-8 dark:from-slate-900 dark:to-slate-800">
       {/* Fixed Controls */}
       <div className="fixed right-4 top-4 z-50 min-w-52 rounded-xl border border-gray-200 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800">
         <h2 className="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Controls</h2>
@@ -189,40 +189,38 @@ export default function ArrowsDemoPage() {
             <span>Force JS fallback</span>
           </label>
           <div
-            className={`rounded border px-2 py-1.5 text-xs transition-colors ${
+            className={`flex items-center gap-1.5 rounded border px-2 py-1.5 text-xs transition-colors ${
               forceFallback
                 ? 'border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-400'
                 : 'border-gray-200 bg-gray-50 text-gray-400 dark:border-gray-600 dark:bg-gray-700/50 dark:text-gray-500'
             }`}
           >
+            {forceFallback && <AlertTriangle className="h-3 w-3" />}
             Arrows hidden in fallback mode
           </div>
           <div className="flex flex-col gap-1">
             <span className="text-xs text-gray-500 dark:text-gray-400">Fallback Strategy</span>
-            <select
-              value={fallbackStrategy}
-              onChange={(e) => setFallbackStrategy(e.target.value as TFallbackStrategy)}
-              disabled={!forceFallback}
-              className="rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-            >
-              {fallbackStrategies.map((strategy) => (
-                <option key={strategy.value} value={strategy.value}>
-                  {strategy.label}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={fallbackStrategy}
+                onChange={(e) => setFallbackStrategy(e.target.value as TFallbackStrategy)}
+                disabled={!forceFallback}
+                className="w-full appearance-none rounded-md border border-gray-300 bg-white py-1.5 pl-2 pr-8 text-sm text-gray-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+              >
+                {fallbackStrategies.map((strategy) => (
+                  <option key={strategy.value} value={strategy.value}>
+                    {strategy.label}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            </div>
           </div>
         </div>
       </div>
 
       {/* Header */}
       <header className="mx-auto mb-12 max-w-5xl text-center">
-        <Link
-          href="/"
-          className="mb-4 inline-block text-sm font-medium text-blue-500 transition-colors hover:text-blue-600"
-        >
-          ← Back to Home
-        </Link>
         <h1 className="mb-3 text-4xl font-bold text-gray-900 dark:text-gray-100">
           Popover Arrows with CSS Anchor Positioning
         </h1>
@@ -249,9 +247,12 @@ export default function ArrowsDemoPage() {
       {/* Info section */}
       <footer className="mx-auto mt-12 grid max-w-5xl gap-6 lg:grid-cols-3">
         <div className="rounded-2xl bg-white p-6 shadow-md dark:bg-gray-800">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">
-            How it works (CSS)
-          </h2>
+          <div className="mb-4 flex items-center gap-2">
+            <Info className="h-5 w-5 text-blue-500" />
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              How it works (CSS)
+            </h2>
+          </div>
           <p className="mb-4 leading-relaxed text-gray-500 dark:text-gray-400">
             The CSS technique uses{' '}
             <code className="rounded bg-blue-500/10 px-1.5 py-0.5 text-sm text-blue-500">
@@ -286,15 +287,18 @@ export default function ArrowsDemoPage() {
               </>,
             ].map((item, i) => (
               <li key={i} className="flex gap-2 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
-                <span className="text-blue-500">→</span>
+                <ArrowRight className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-500" />
                 <span>{item}</span>
               </li>
             ))}
           </ul>
-          <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-400">
-            <strong>⚠️ Limitation:</strong> This technique requires{' '}
-            <code className="rounded bg-amber-500/20 px-1 py-0.5 text-xs">box-shadow: none</code> on
-            the popover.
+          <div className="mt-4 flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-400">
+            <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+            <div>
+              <strong>Limitation:</strong> This technique requires{' '}
+              <code className="rounded bg-amber-500/20 px-1 py-0.5 text-xs">box-shadow: none</code> on
+              the popover.
+            </div>
           </div>
         </div>
 
@@ -323,7 +327,7 @@ export default function ArrowsDemoPage() {
               'Positioning still works correctly, just without the arrow',
             ].map((item, i) => (
               <li key={i} className="flex gap-2 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
-                <span className="text-blue-500">→</span>
+                <ArrowRight className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-500" />
                 <span>{item}</span>
               </li>
             ))}

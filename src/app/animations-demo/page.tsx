@@ -1,8 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { useRef, useState, useId, useLayoutEffect, type ReactNode } from 'react';
 import invariant from 'tiny-invariant';
+import { ChevronDown, Copy, Scissors, ClipboardPaste, Trash2, Undo2, ArrowRight, Info } from 'lucide-react';
 import { combine } from '@/utils/combine';
 import { setStyle } from '@/utils/set-style';
 import { setAttribute } from '@/utils/set-attribute';
@@ -54,11 +54,11 @@ const animations: { id: AnimationStyle; name: string; description: string }[] = 
 ];
 
 const menuItems = [
-  { icon: '📋', label: 'Copy', shortcut: '⌘C' },
-  { icon: '✂️', label: 'Cut', shortcut: '⌘X' },
-  { icon: '📌', label: 'Paste', shortcut: '⌘V' },
-  { icon: '🗑️', label: 'Delete', shortcut: '⌫' },
-  { icon: '↩️', label: 'Undo', shortcut: '⌘Z' },
+  { icon: Copy, label: 'Copy', shortcut: '⌘C' },
+  { icon: Scissors, label: 'Cut', shortcut: '⌘X' },
+  { icon: ClipboardPaste, label: 'Paste', shortcut: '⌘V' },
+  { icon: Trash2, label: 'Delete', shortcut: '⌫' },
+  { icon: Undo2, label: 'Undo', shortcut: '⌘Z' },
 ];
 
 function AnimatedDropdown({
@@ -159,17 +159,7 @@ function DropdownDemo({ animation }: { animation: AnimationStyle }) {
           aria-haspopup="menu"
         >
           <span>Show dropdown</span>
-          <svg
-            className={`chevron ${isOpen ? 'open' : ''}`}
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <ChevronDown className={`chevron ${isOpen ? 'open' : ''}`} />
         </button>
         <AnimatedDropdown
           animation={animation}
@@ -178,19 +168,22 @@ function DropdownDemo({ animation }: { animation: AnimationStyle }) {
           onClose={() => setIsOpen(false)}
         >
           <div className="menu-items">
-            {menuItems.map((item) => (
-              <button
-                key={item.label}
-                type="button"
-                role="menuitem"
-                className="menu-item"
-                onClick={() => setIsOpen(false)}
-              >
-                <span className="menu-icon">{item.icon}</span>
-                <span className="menu-label">{item.label}</span>
-                <span className="menu-shortcut">{item.shortcut}</span>
-              </button>
-            ))}
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.label}
+                  type="button"
+                  role="menuitem"
+                  className="menu-item"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Icon className="menu-icon" />
+                  <span className="menu-label">{item.label}</span>
+                  <span className="menu-shortcut">{item.shortcut}</span>
+                </button>
+              );
+            })}
           </div>
         </AnimatedDropdown>
       </div>
@@ -200,15 +193,9 @@ function DropdownDemo({ animation }: { animation: AnimationStyle }) {
 
 export default function AnimationsDemoPage() {
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 p-8 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-full overflow-auto bg-linear-to-br from-gray-50 to-gray-100 p-8 dark:from-slate-900 dark:to-slate-800">
       {/* Header */}
       <header className="mx-auto mb-12 max-w-5xl text-center">
-        <Link
-          href="/"
-          className="mb-4 inline-block text-sm font-medium text-blue-500 transition-colors hover:text-blue-600"
-        >
-          ← Back to Home
-        </Link>
         <h1 className="mb-3 text-4xl font-bold text-gray-900 dark:text-gray-100">
           Dropdown Animation Showcase
         </h1>
@@ -233,48 +220,51 @@ export default function AnimationsDemoPage() {
 
       {/* Info section */}
       <footer className="mx-auto mt-12 max-w-5xl">
-        <div className="rounded-2xl bg-white p-6 shadow-md dark:bg-gray-800">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">
-            How it works
-          </h2>
-          <p className="mb-4 leading-relaxed text-gray-500 dark:text-gray-400">
-            Modern CSS provides powerful tools for animating top layer elements (popovers, dialogs):
-          </p>
-          <ul className="space-y-2">
-            {[
-              <>
-                <code className="rounded bg-blue-500/10 px-1 py-0.5 text-xs text-blue-500">
-                  @starting-style
-                </code>{' '}
-                defines the initial state before the element appears
-              </>,
-              <>
-                <code className="rounded bg-blue-500/10 px-1 py-0.5 text-xs text-blue-500">
-                  transition-behavior: allow-discrete
-                </code>{' '}
-                enables animating discrete properties like{' '}
-                <code className="rounded bg-blue-500/10 px-1 py-0.5 text-xs text-blue-500">
-                  display
-                </code>{' '}
-                and{' '}
-                <code className="rounded bg-blue-500/10 px-1 py-0.5 text-xs text-blue-500">
-                  overlay
-                </code>
-              </>,
-              <>
-                The{' '}
-                <code className="rounded bg-blue-500/10 px-1 py-0.5 text-xs text-blue-500">
-                  :popover-open
-                </code>{' '}
-                pseudo-class targets the open state
-              </>,
-            ].map((item, i) => (
-              <li key={i} className="flex gap-2 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
-                <span className="text-blue-500">→</span>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
+        <div className="flex items-start gap-3 rounded-2xl bg-white p-6 shadow-md dark:bg-gray-800">
+          <Info className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-500" />
+          <div>
+            <h2 className="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100">
+              How it works
+            </h2>
+            <p className="mb-4 leading-relaxed text-gray-500 dark:text-gray-400">
+              Modern CSS provides powerful tools for animating top layer elements (popovers, dialogs):
+            </p>
+            <ul className="space-y-2">
+              {[
+                <>
+                  <code className="rounded bg-blue-500/10 px-1 py-0.5 text-xs text-blue-500">
+                    @starting-style
+                  </code>{' '}
+                  defines the initial state before the element appears
+                </>,
+                <>
+                  <code className="rounded bg-blue-500/10 px-1 py-0.5 text-xs text-blue-500">
+                    transition-behavior: allow-discrete
+                  </code>{' '}
+                  enables animating discrete properties like{' '}
+                  <code className="rounded bg-blue-500/10 px-1 py-0.5 text-xs text-blue-500">
+                    display
+                  </code>{' '}
+                  and{' '}
+                  <code className="rounded bg-blue-500/10 px-1 py-0.5 text-xs text-blue-500">
+                    overlay
+                  </code>
+                </>,
+                <>
+                  The{' '}
+                  <code className="rounded bg-blue-500/10 px-1 py-0.5 text-xs text-blue-500">
+                    :popover-open
+                  </code>{' '}
+                  pseudo-class targets the open state
+                </>,
+              ].map((item, i) => (
+                <li key={i} className="flex gap-2 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+                  <ArrowRight className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-500" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </footer>
     </div>

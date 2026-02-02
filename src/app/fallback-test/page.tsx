@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { useRef, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import type { TPosition, TFallbackStrategy } from '@/components/popover';
 import { Tooltip, useTooltip } from '@/components/tooltip';
 
@@ -61,28 +61,31 @@ export default function FallbackTestPage() {
   const effectiveFallbackStrategy = forceFallback ? fallbackStrategy : undefined;
 
   return (
-    <div className="min-h-[300vh] bg-gray-50 p-8 dark:bg-gray-900">
+    <div className="min-h-[300vh] overflow-auto bg-gray-50 p-8 dark:bg-gray-900">
       {/* Fixed controls */}
-      <div className="fixed top-4 right-4 z-50 rounded-lg border border-gray-200 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800">
+      <div className="fixed right-4 top-4 z-50 rounded-lg border border-gray-200 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800">
         <h2 className="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
           Controls
         </h2>
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
             <span className="text-xs text-gray-500 dark:text-gray-400">Position</span>
-            <select
-              value={position}
-              onChange={(e) => setPosition(e.target.value as TPosition)}
-              className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-            >
-              {positions.map((pos) => (
-                <option key={pos.value} value={pos.value}>
-                  {pos.label}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={position}
+                onChange={(e) => setPosition(e.target.value as TPosition)}
+                className="w-full appearance-none rounded-md border border-gray-300 bg-white py-1 pl-2 pr-8 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+              >
+                {positions.map((pos) => (
+                  <option key={pos.value} value={pos.value}>
+                    {pos.label}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            </div>
           </div>
-          <label className="flex items-center gap-2 cursor-pointer">
+          <label className="flex cursor-pointer items-center gap-2">
             <input
               type="checkbox"
               checked={forceFallback}
@@ -95,31 +98,28 @@ export default function FallbackTestPage() {
           </label>
           <div className="flex flex-col gap-1">
             <span className="text-xs text-gray-500 dark:text-gray-400">Fallback Strategy</span>
-            <select
-              value={fallbackStrategy}
-              onChange={(e) => setFallbackStrategy(e.target.value as TFallbackStrategy)}
-              disabled={!forceFallback}
-              className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-            >
-              {fallbackStrategies.map((strategy) => (
-                <option key={strategy.value} value={strategy.value}>
-                  {strategy.label}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={fallbackStrategy}
+                onChange={(e) => setFallbackStrategy(e.target.value as TFallbackStrategy)}
+                disabled={!forceFallback}
+                className="w-full appearance-none rounded-md border border-gray-300 bg-white py-1 pl-2 pr-8 text-sm text-gray-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+              >
+                {fallbackStrategies.map((strategy) => (
+                  <option key={strategy.value} value={strategy.value}>
+                    {strategy.label}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            </div>
           </div>
         </div>
       </div>
 
       {/* Header */}
       <div className="mb-8">
-        <Link
-          href="/"
-          className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-        >
-          ← Back to Home
-        </Link>
-        <h1 className="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
           Fallback Positioning Test
         </h1>
         <p className="mt-2 text-gray-600 dark:text-gray-400">

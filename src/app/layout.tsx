@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { SidebarProvider } from "@/components/sidebar";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Popover Component Demo",
-  description: "A powerful popover component using CSS Anchor Positioning with JavaScript fallback",
+  title: "Anchor Lab - CSS Anchor Positioning Experiments",
+  description: "Exploring CSS Anchor Positioning with popovers, tooltips, and animations",
 };
 
 export default function RootLayout({
@@ -27,7 +28,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <SidebarProvider>{children}</SidebarProvider>
       </body>
     </html>
   );

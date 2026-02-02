@@ -77,7 +77,16 @@
 }
 
 .menu-icon {
-  font-size: 1rem;
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  color: #6b7280;
+}
+
+@media (prefers-color-scheme: dark) {
+  .menu-icon {
+    color: #9ca3af;
+  }
 }
 
 .menu-label {
