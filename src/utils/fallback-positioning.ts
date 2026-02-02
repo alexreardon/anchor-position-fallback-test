@@ -1,42 +1,32 @@
-import { bindAll } from 'bind-event-listener';
 import type { TCleanupFn } from '@/types';
 import type { TPosition } from '@/components/popover';
+import {
+  type TBasePlacement,
+  type TAvailableSpace,
+  type TFallbackStrategy,
+  getAvailableSpace,
+  bindPositionUpdates,
+} from './placement-utils';
 
-type TPlacement = 'top' | 'right' | 'bottom' | 'left';
-
-type TAvailableSpace = {
-  top: number;
-  right: number;
-  bottom: number;
-  left: number;
-};
+export type { TFallbackStrategy };
 
 /**
  * Gap between the trigger and the popover in pixels
  */
 const GAP = 4;
 
-function getAvailableSpace(triggerRect: DOMRect): TAvailableSpace {
-  return {
-    top: triggerRect.top,
-    right: window.innerWidth - triggerRect.right,
-    bottom: window.innerHeight - triggerRect.bottom,
-    left: triggerRect.left,
-  };
-}
-
-function getBestInlinePlacement(available: TAvailableSpace): TPlacement {
+function getBestInlinePlacement(available: TAvailableSpace): TBasePlacement {
   return available.right >= available.left ? 'right' : 'left';
 }
 
-function getBestBlockPlacement(available: TAvailableSpace): TPlacement {
+function getBestBlockPlacement(available: TAvailableSpace): TBasePlacement {
   return available.bottom >= available.top ? 'bottom' : 'top';
 }
 
 function getPlacementFromPosition(
   position: TPosition,
   available: TAvailableSpace,
-): TPlacement {
+): TBasePlacement {
   if (position === 'inline-end') {
     return getBestInlinePlacement(available);
   }
@@ -51,7 +41,7 @@ function getPlacementFromPosition(
  */
 function applyPlacementStyles(
   popover: HTMLElement,
-  placement: TPlacement,
+  placement: TBasePlacement,
   position: TPosition,
   triggerRect: DOMRect,
 ): void {
@@ -117,56 +107,6 @@ function applyPlacement(
   applyPlacementStyles(popover, placement, position, triggerRect);
 }
 
-export type TFallbackStrategy = 'update-on-change' | 'update-each-frame';
-
-/**
- * Fallback positioning that updates on scroll and resize events.
- * More efficient but may miss some edge cases.
- */
-function bindUpdateOnChange(
-  popover: HTMLElement,
-  trigger: HTMLElement,
-  position: TPosition,
-): TCleanupFn {
-  function update() {
-    applyPlacement(popover, trigger, position);
-  }
-
-  update();
-
-  return bindAll(window, [
-    { type: 'scroll', listener: update, options: { capture: true, passive: true } },
-    { type: 'resize', listener: update, options: { passive: true } },
-  ]);
-}
-
-/**
- * Fallback positioning that updates on every animation frame.
- * More reliable but uses more resources.
- */
-function bindUpdateEachFrame(
-  popover: HTMLElement,
-  trigger: HTMLElement,
-  position: TPosition,
-): TCleanupFn {
-  let frameId: number;
-  let isRunning = true;
-
-  function update() {
-    applyPlacement(popover, trigger, position);
-    if (isRunning) {
-      frameId = requestAnimationFrame(update);
-    }
-  }
-
-  frameId = requestAnimationFrame(update);
-
-  return function cleanup() {
-    isRunning = false;
-    cancelAnimationFrame(frameId);
-  };
-}
-
 /**
  * Provides JavaScript-based positioning as a fallback for browsers
  * that don't support CSS Anchor Positioning.
@@ -177,9 +117,8 @@ export function bindFallbackPositioning(
   position: TPosition,
   strategy: TFallbackStrategy = 'update-on-change',
 ): TCleanupFn {
-  if (strategy === 'update-each-frame') {
-    return bindUpdateEachFrame(popover, trigger, position);
-  }
-
-  return bindUpdateOnChange(popover, trigger, position);
+  return bindPositionUpdates(
+    () => applyPlacement(popover, trigger, position),
+    strategy,
+  );
 }

@@ -27,6 +27,11 @@ const demos: { href: string; title: string; description: string }[] = [
     title: 'Dropdown Animation Showcase',
     description: 'Explore 16 different entrance and exit animations for top layer dropdown menus.',
   },
+  {
+    href: '/arrows-demo',
+    title: 'Popover Arrows Demo',
+    description: 'Auto-flipping arrows using clip-path margin-box technique with CSS Anchor Positioning.',
+  },
 ];
 
 export default function Home() {
