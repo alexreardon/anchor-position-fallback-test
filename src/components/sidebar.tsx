@@ -13,6 +13,7 @@ import {
   Target,
   AlertTriangle,
   FlaskConical,
+  Bell,
 } from 'lucide-react';
 
 type SidebarContextType = {
@@ -69,6 +70,12 @@ const navItems = [
     label: 'Arrows',
     icon: ArrowUpRight,
     description: 'Popover arrows',
+  },
+  {
+    href: '/toast-demo',
+    label: 'Toast',
+    icon: Bell,
+    description: 'Toast notifications',
   },
   {
     href: '/fallback-test',
