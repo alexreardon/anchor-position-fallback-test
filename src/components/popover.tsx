@@ -141,7 +141,7 @@ export function Popover({
         }
       }}
       className={css(
-        'rounded border border-zinc-200 bg-white p-2 font-normal shadow-lg dark:border-zinc-700 dark:bg-zinc-800',
+        'rounded border border-gray-200 bg-white p-2 font-normal shadow-lg dark:border-gray-700 dark:bg-gray-800',
       )}
     >
       {children}

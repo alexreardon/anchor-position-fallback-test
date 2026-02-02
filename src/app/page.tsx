@@ -42,9 +42,9 @@ export default function Home() {
   const [fallbackStrategy, setFallbackStrategy] = useState<TFallbackStrategy>('update-on-change');
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-zinc-50 p-8 dark:bg-zinc-900">
-      <div className="rounded-xl border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
-        <h1 className="mb-6 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-gray-50 p-8 dark:bg-gray-900">
+      <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <h1 className="mb-6 text-2xl font-semibold text-gray-900 dark:text-gray-100">
           Popover Component Demo
         </h1>
 
@@ -53,7 +53,7 @@ export default function Home() {
           <div className="flex flex-col gap-2">
             <label
               htmlFor="position-select"
-              className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              className="text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               Tooltip Position
             </label>
@@ -61,7 +61,7 @@ export default function Home() {
               id="position-select"
               value={position}
               onChange={(e) => setPosition(e.target.value as TPosition)}
-              className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-zinc-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
+              className="rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
             >
               {positions.map((pos) => (
                 <option key={pos.value} value={pos.value}>
@@ -72,25 +72,25 @@ export default function Home() {
           </div>
 
           {/* Force fallback section */}
-          <div className="flex flex-col gap-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-700">
+          <div className="flex flex-col gap-3 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={forceFallback}
                 onChange={(e) => setForceFallback(e.target.checked)}
-                className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-700"
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
               />
-              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Force JavaScript fallback
               </span>
             </label>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               Use fallback positioning even when CSS Anchor Positioning is supported
             </p>
             <div className="flex flex-col gap-2">
               <label
                 htmlFor="fallback-strategy-select"
-                className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                className="text-sm font-medium text-gray-700 dark:text-gray-300"
               >
                 Fallback Strategy
               </label>
@@ -99,7 +99,7 @@ export default function Home() {
                 value={fallbackStrategy}
                 onChange={(e) => setFallbackStrategy(e.target.value as TFallbackStrategy)}
                 disabled={!forceFallback}
-                className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-zinc-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
+                className="rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
               >
                 {fallbackStrategies.map((strategy) => (
                   <option key={strategy.value} value={strategy.value}>
@@ -112,7 +112,7 @@ export default function Home() {
 
           {/* Tooltip demo */}
           <div className="flex flex-col items-center gap-4 py-8">
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Hover or focus the button to see the tooltip
             </p>
 
@@ -120,7 +120,7 @@ export default function Home() {
               ref={buttonRef}
               type="button"
               {...triggerProps}
-              className="rounded-md bg-blue-600 px-4 py-2 font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-800"
+              className="rounded-md bg-blue-600 px-4 py-2 font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
             >
               Hover me
             </button>
@@ -132,7 +132,7 @@ export default function Home() {
               fallbackStrategy={forceFallback ? fallbackStrategy : undefined}
               onOpenChange={setIsOpen}
             >
-              <span className="text-sm text-zinc-700 dark:text-zinc-300">
+              <span className="text-sm text-gray-700 dark:text-gray-300">
                 Hello! I am a tooltip positioned at "{position}"
               </span>
             </Tooltip>
@@ -140,14 +140,14 @@ export default function Home() {
         </div>
       </div>
 
-      <p className="max-w-md text-center text-sm text-zinc-500 dark:text-zinc-400">
+      <p className="max-w-md text-center text-sm text-gray-500 dark:text-gray-400">
         This popover component uses CSS Anchor Positioning when supported,
         with a JavaScript fallback for older browsers.
       </p>
 
       {/* Demos section */}
       <div className="w-full max-w-md">
-        <h2 className="mb-4 text-center text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+        <h2 className="mb-4 text-center text-lg font-semibold text-gray-900 dark:text-gray-100">
           Demos
         </h2>
         <div className="flex flex-col gap-3">
@@ -155,17 +155,17 @@ export default function Home() {
             <Link
               key={demo.href}
               href={demo.href}
-              className="group rounded-lg border border-zinc-200 bg-white p-4 shadow-sm transition-all hover:border-blue-300 hover:shadow-md dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-blue-600"
+              className="group rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all hover:border-blue-300 hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:hover:border-blue-600"
             >
               <div className="flex items-center justify-between">
-                <h3 className="font-medium text-zinc-900 group-hover:text-blue-600 dark:text-zinc-100 dark:group-hover:text-blue-400">
+                <h3 className="font-medium text-gray-900 group-hover:text-blue-600 dark:text-gray-100 dark:group-hover:text-blue-400">
                   {demo.title}
                 </h3>
-                <span className="text-zinc-400 transition-transform group-hover:translate-x-1">
+                <span className="text-gray-400 transition-transform group-hover:translate-x-1">
                   →
                 </span>
               </div>
-              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 {demo.description}
               </p>
             </Link>

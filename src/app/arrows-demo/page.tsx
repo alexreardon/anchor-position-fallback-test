@@ -12,6 +12,7 @@ import {
   type TArrowPlacement,
   type TFallbackStrategy,
 } from '@/utils/arrow-fallback-positioning';
+import './arrow-popover.css';
 
 type Placement = TArrowPlacement;
 
@@ -62,7 +63,6 @@ function ArrowPopover({
 
     const cleanupFns: (() => void)[] = [];
 
-    // Link the popover to the trigger for accessibility
     cleanupFns.push(
       setAttribute(trigger, { attribute: 'aria-controls', value: id }),
       setAttribute(trigger, { attribute: 'aria-expanded', value: 'true' }),
@@ -79,7 +79,6 @@ function ArrowPopover({
         setStyle(popover, { property: 'position-anchor', value: triggerAnchorName }),
       );
     } else {
-      // Use JS fallback positioning
       cleanupFns.push(
         bindArrowFallbackPositioning(
           popover,
@@ -93,7 +92,6 @@ function ArrowPopover({
     popover.showPopover();
     cleanupFns.push(() => popover.hidePopover());
 
-    // Cleanup expanded state
     cleanupFns.push(() => {
       trigger.removeAttribute('aria-expanded');
     });
@@ -103,7 +101,6 @@ function ArrowPopover({
 
   if (!isOpen) return null;
 
-  // When using fallback, we don't use the placement class (CSS handles it via data-actual-placement)
   const useFallback = fallbackStrategy !== undefined || !supportsAnchorPositioning();
   const className = useFallback
     ? 'arrow-popover arrow-popover-fallback'
@@ -138,17 +135,19 @@ function PlacementDemo({
   const placementInfo = placements.find((p) => p.id === placement)!;
 
   return (
-    <div className="demo-card">
-      <div className="demo-header">
-        <h3 className="demo-title">{placementInfo.name}</h3>
-        <p className="demo-description">{placementInfo.description}</p>
+    <div className="overflow-hidden rounded-2xl bg-white shadow-md transition-shadow hover:shadow-lg dark:bg-gray-800">
+      <div className="border-b border-gray-200 px-5 py-4 dark:border-gray-700">
+        <h3 className="mb-1 text-base font-semibold text-gray-900 dark:text-gray-100">
+          {placementInfo.name}
+        </h3>
+        <p className="text-xs text-gray-500 dark:text-gray-400">{placementInfo.description}</p>
       </div>
-      <div className="demo-content">
+      <div className="flex min-h-24 items-center justify-center p-6">
         <button
           ref={triggerRef}
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="trigger-button"
+          className="inline-flex items-center gap-2 rounded-lg bg-linear-to-br from-blue-500 to-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:from-blue-600 hover:to-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
           aria-haspopup="true"
         >
           Click me
@@ -175,32 +174,36 @@ export default function ArrowsDemoPage() {
   const effectiveFallbackStrategy = forceFallback ? fallbackStrategy : undefined;
 
   return (
-    <div className="arrows-page">
-      <style>{arrowStyles}</style>
-
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 p-8 dark:from-slate-900 dark:to-slate-800">
       {/* Fixed Controls */}
-      <div className="fixed-controls">
-        <h2 className="controls-title">Controls</h2>
-        <div className="controls-content">
-          <label className="checkbox-label">
+      <div className="fixed right-4 top-4 z-50 min-w-52 rounded-xl border border-gray-200 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800">
+        <h2 className="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Controls</h2>
+        <div className="flex flex-col gap-3">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
             <input
               type="checkbox"
               checked={forceFallback}
               onChange={(e) => setForceFallback(e.target.checked)}
-              className="checkbox"
+              className="size-4 rounded border-gray-300 accent-blue-500"
             />
             <span>Force JS fallback</span>
           </label>
-          <div className={`fallback-notice ${forceFallback ? 'fallback-notice-active' : ''}`}>
+          <div
+            className={`rounded border px-2 py-1.5 text-xs transition-colors ${
+              forceFallback
+                ? 'border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-400'
+                : 'border-gray-200 bg-gray-50 text-gray-400 dark:border-gray-600 dark:bg-gray-700/50 dark:text-gray-500'
+            }`}
+          >
             Arrows hidden in fallback mode
           </div>
-          <div className="select-group">
-            <span className="select-label">Fallback Strategy</span>
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-gray-500 dark:text-gray-400">Fallback Strategy</span>
             <select
               value={fallbackStrategy}
               onChange={(e) => setFallbackStrategy(e.target.value as TFallbackStrategy)}
               disabled={!forceFallback}
-              className="select"
+              className="rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
             >
               {fallbackStrategies.map((strategy) => (
                 <option key={strategy.value} value={strategy.value}>
@@ -213,20 +216,27 @@ export default function ArrowsDemoPage() {
       </div>
 
       {/* Header */}
-      <header className="page-header">
-        <Link href="/" className="back-link">
+      <header className="mx-auto mb-12 max-w-5xl text-center">
+        <Link
+          href="/"
+          className="mb-4 inline-block text-sm font-medium text-blue-500 transition-colors hover:text-blue-600"
+        >
           ← Back to Home
         </Link>
-        <h1 className="page-title">Popover Arrows with CSS Anchor Positioning</h1>
-        <p className="page-subtitle">
+        <h1 className="mb-3 text-4xl font-bold text-gray-900 dark:text-gray-100">
+          Popover Arrows with CSS Anchor Positioning
+        </h1>
+        <p className="mx-auto max-w-2xl leading-relaxed text-gray-500 dark:text-gray-400">
           Arrows that automatically flip when the popover repositions, using the{' '}
-          <code>clip-path: inset() margin-box</code> technique. Arrows are hidden when
-          CSS Anchor Positioning is not available.
+          <code className="rounded bg-blue-500/10 px-1.5 py-0.5 text-sm text-blue-500">
+            clip-path: inset() margin-box
+          </code>{' '}
+          technique. Arrows are hidden when CSS Anchor Positioning is not available.
         </p>
       </header>
 
       {/* Placement grid */}
-      <main className="demos-grid">
+      <main className="mx-auto grid max-w-5xl grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6">
         {placements.map((placement) => (
           <PlacementDemo
             key={placement.id}
@@ -237,118 +247,130 @@ export default function ArrowsDemoPage() {
       </main>
 
       {/* Info section */}
-      <footer className="page-footer">
-        <div className="info-card">
-          <h2>How it works (CSS)</h2>
-          <p>
-            The CSS technique uses <code>clip-path: inset() margin-box</code> to create
-            auto-flipping arrows:
+      <footer className="mx-auto mt-12 grid max-w-5xl gap-6 lg:grid-cols-3">
+        <div className="rounded-2xl bg-white p-6 shadow-md dark:bg-gray-800">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">
+            How it works (CSS)
+          </h2>
+          <p className="mb-4 leading-relaxed text-gray-500 dark:text-gray-400">
+            The CSS technique uses{' '}
+            <code className="rounded bg-blue-500/10 px-1.5 py-0.5 text-sm text-blue-500">
+              clip-path: inset() margin-box
+            </code>{' '}
+            to create auto-flipping arrows:
           </p>
-          <ul>
-            <li>
-              Arrows pointing in <strong>all four directions</strong> are created using{' '}
-              <code>::before</code> and <code>::after</code> pseudo-elements
-            </li>
-            <li>
-              <code>clip-path: inset(1px) margin-box</code> clips based on the{' '}
-              <strong>margin-box</strong>, not the border-box
-            </li>
-            <li>
-              Margins control which arrow is visible — arrows extending into the margin area
-              "escape" the clip
-            </li>
-            <li>
-              <code>@position-try</code> can change margins, so the correct arrow appears
-              when the popover flips
-            </li>
+          <ul className="space-y-2">
+            {[
+              <>
+                Arrows pointing in <strong>all four directions</strong> are created using{' '}
+                <code className="rounded bg-blue-500/10 px-1 py-0.5 text-xs text-blue-500">
+                  ::before
+                </code>{' '}
+                and{' '}
+                <code className="rounded bg-blue-500/10 px-1 py-0.5 text-xs text-blue-500">
+                  ::after
+                </code>
+              </>,
+              <>
+                <code className="rounded bg-blue-500/10 px-1 py-0.5 text-xs text-blue-500">
+                  clip-path: inset(1px) margin-box
+                </code>{' '}
+                clips based on the <strong>margin-box</strong>
+              </>,
+              'Margins control which arrow is visible — arrows "escape" the clip',
+              <>
+                <code className="rounded bg-blue-500/10 px-1 py-0.5 text-xs text-blue-500">
+                  @position-try
+                </code>{' '}
+                changes margins when the popover flips
+              </>,
+            ].map((item, i) => (
+              <li key={i} className="flex gap-2 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+                <span className="text-blue-500">→</span>
+                <span>{item}</span>
+              </li>
+            ))}
           </ul>
-          <div className="warning-box">
+          <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-400">
             <strong>⚠️ Limitation:</strong> This technique requires{' '}
-            <code>box-shadow: none</code> on the popover, as box-shadow interferes with the
-            margin-box clipping.
+            <code className="rounded bg-amber-500/20 px-1 py-0.5 text-xs">box-shadow: none</code> on
+            the popover.
           </div>
         </div>
 
-        <div className="info-card">
-          <h2>JS Fallback Behavior</h2>
-          <p>
+        <div className="rounded-2xl bg-white p-6 shadow-md dark:bg-gray-800">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">
+            JS Fallback Behavior
+          </h2>
+          <p className="mb-4 leading-relaxed text-gray-500 dark:text-gray-400">
             For browsers without CSS Anchor Positioning support:
           </p>
-          <ul>
-            <li>
-              JavaScript calculates available space using{' '}
-              <code>getBoundingClientRect()</code>
-            </li>
-            <li>
-              Popover flips to the opposite side if there's not enough space
-            </li>
-            <li>
-              <strong>Arrows are hidden</strong> — the auto-flip arrow technique requires
-              CSS Anchor Positioning's <code>@position-try</code> rules
-            </li>
-            <li>
-              Positioning still works correctly, just without the visual arrow indicator
-            </li>
+          <ul className="space-y-2">
+            {[
+              <>
+                JavaScript calculates available space using{' '}
+                <code className="rounded bg-blue-500/10 px-1 py-0.5 text-xs text-blue-500">
+                  getBoundingClientRect()
+                </code>
+              </>,
+              'Popover flips to the opposite side if there\'s not enough space',
+              <>
+                <strong>Arrows are hidden</strong> — the auto-flip technique requires{' '}
+                <code className="rounded bg-blue-500/10 px-1 py-0.5 text-xs text-blue-500">
+                  @position-try
+                </code>
+              </>,
+              'Positioning still works correctly, just without the arrow',
+            ].map((item, i) => (
+              <li key={i} className="flex gap-2 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+                <span className="text-blue-500">→</span>
+                <span>{item}</span>
+              </li>
+            ))}
           </ul>
         </div>
 
-        <div className="info-card">
-          <h2>Position-Area Reference</h2>
-          <p>
-            Mapping common placement names to <code>position-area</code> values:
+        <div className="rounded-2xl bg-white p-6 shadow-md dark:bg-gray-800">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">
+            Position-Area Reference
+          </h2>
+          <p className="mb-4 leading-relaxed text-gray-500 dark:text-gray-400">
+            Mapping placement names to{' '}
+            <code className="rounded bg-blue-500/10 px-1.5 py-0.5 text-sm text-blue-500">
+              position-area
+            </code>{' '}
+            values:
           </p>
-          <div className="position-table-wrapper">
-            <table className="position-table">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
               <thead>
-                <tr>
-                  <th>Placement</th>
-                  <th>position-area</th>
-                  <th>Margin (arrow side)</th>
+                <tr className="border-b border-gray-200 dark:border-gray-700">
+                  <th className="py-2 text-left font-semibold text-gray-900 dark:text-gray-100">
+                    Placement
+                  </th>
+                  <th className="py-2 text-left font-semibold text-gray-900 dark:text-gray-100">
+                    position-area
+                  </th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td>top</td>
-                  <td>
-                    <code>top center</code>
-                  </td>
-                  <td>margin-bottom</td>
-                </tr>
-                <tr>
-                  <td>bottom</td>
-                  <td>
-                    <code>bottom center</code>
-                  </td>
-                  <td>margin-top</td>
-                </tr>
-                <tr>
-                  <td>left</td>
-                  <td>
-                    <code>left center</code>
-                  </td>
-                  <td>margin-right</td>
-                </tr>
-                <tr>
-                  <td>right</td>
-                  <td>
-                    <code>right center</code>
-                  </td>
-                  <td>margin-left</td>
-                </tr>
-                <tr>
-                  <td>top-start</td>
-                  <td>
-                    <code>top span-right</code>
-                  </td>
-                  <td>margin-bottom</td>
-                </tr>
-                <tr>
-                  <td>right-start</td>
-                  <td>
-                    <code>right span-bottom</code>
-                  </td>
-                  <td>margin-left</td>
-                </tr>
+              <tbody className="text-gray-500 dark:text-gray-400">
+                {[
+                  ['top', 'top center'],
+                  ['bottom', 'bottom center'],
+                  ['left', 'left center'],
+                  ['right', 'right center'],
+                  ['top-start', 'top span-right'],
+                  ['right-start', 'right span-bottom'],
+                ].map(([placement, area]) => (
+                  <tr key={placement} className="border-b border-gray-100 dark:border-gray-700/50">
+                    <td className="py-2">{placement}</td>
+                    <td className="py-2">
+                      <code className="rounded bg-blue-500/10 px-1 py-0.5 text-xs text-blue-500">
+                        {area}
+                      </code>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -357,761 +379,3 @@ export default function ArrowsDemoPage() {
     </div>
   );
 }
-
-const arrowStyles = `
-  /* ===== CSS Variables for Arrow Sizing ===== */
-  :root {
-    --tether-offset: 1px;
-    --tether-size: 8px;
-  }
-
-  /* ===== Page Layout ===== */
-  .arrows-page {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
-    padding: 2rem;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .arrows-page {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    }
-  }
-
-  /* ===== Fixed Controls ===== */
-  .fixed-controls {
-    position: fixed;
-    top: 1rem;
-    right: 1rem;
-    z-index: 50;
-    background: white;
-    border-radius: 0.75rem;
-    padding: 1rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    border: 1px solid #e5e7eb;
-    min-width: 200px;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .fixed-controls {
-      background: #1f2937;
-      border-color: #374151;
-    }
-  }
-
-  .controls-title {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #1f2937;
-    margin-bottom: 0.75rem;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .controls-title {
-      color: #f3f4f6;
-    }
-  }
-
-  .controls-content {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    font-size: 0.8125rem;
-    color: #374151;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .checkbox-label {
-      color: #d1d5db;
-    }
-  }
-
-  .checkbox {
-    width: 1rem;
-    height: 1rem;
-    border-radius: 0.25rem;
-    border: 1px solid #d1d5db;
-    accent-color: #3b82f6;
-  }
-
-  .fallback-notice {
-    font-size: 0.75rem;
-    color: #9ca3af;
-    background: rgba(156, 163, 175, 0.1);
-    padding: 0.375rem 0.5rem;
-    border-radius: 0.25rem;
-    border: 1px solid rgba(156, 163, 175, 0.2);
-    transition: all 0.2s ease;
-  }
-
-  .fallback-notice-active {
-    color: #b45309;
-    background: rgba(251, 191, 36, 0.15);
-    border-color: rgba(251, 191, 36, 0.3);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .fallback-notice {
-      color: #6b7280;
-      background: rgba(107, 114, 128, 0.1);
-      border-color: rgba(107, 114, 128, 0.2);
-    }
-
-    .fallback-notice-active {
-      color: #fbbf24;
-      background: rgba(251, 191, 36, 0.1);
-      border-color: rgba(251, 191, 36, 0.2);
-    }
-  }
-
-  .select-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .select-label {
-    font-size: 0.75rem;
-    color: #6b7280;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .select-label {
-      color: #9ca3af;
-    }
-  }
-
-  .select {
-    padding: 0.375rem 0.5rem;
-    font-size: 0.8125rem;
-    border-radius: 0.375rem;
-    border: 1px solid #d1d5db;
-    background: white;
-    color: #1f2937;
-  }
-
-  .select:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .select {
-      background: #374151;
-      border-color: #4b5563;
-      color: #f3f4f6;
-    }
-  }
-
-  .page-header {
-    max-width: 1200px;
-    margin: 0 auto 3rem;
-    text-align: center;
-  }
-
-  .back-link {
-    display: inline-block;
-    margin-bottom: 1rem;
-    color: #3b82f6;
-    font-size: 0.875rem;
-    font-weight: 500;
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-
-  .back-link:hover {
-    color: #2563eb;
-  }
-
-  .page-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #1f2937;
-    margin-bottom: 0.75rem;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .page-title {
-      color: #f3f4f6;
-    }
-  }
-
-  .page-subtitle {
-    font-size: 1rem;
-    color: #6b7280;
-    max-width: 700px;
-    margin: 0 auto;
-    line-height: 1.6;
-  }
-
-  .page-subtitle code {
-    background: rgba(59, 130, 246, 0.1);
-    color: #3b82f6;
-    padding: 0.125rem 0.375rem;
-    border-radius: 0.25rem;
-    font-size: 0.875em;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .page-subtitle {
-      color: #9ca3af;
-    }
-  }
-
-  /* ===== Demo Grid ===== */
-  .demos-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-
-  .demo-card {
-    background: white;
-    border-radius: 1rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    transition: box-shadow 0.2s ease-out;
-  }
-
-  .demo-card:hover {
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .demo-card {
-      background: #1f2937;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-    }
-
-    .demo-card:hover {
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
-    }
-  }
-
-  .demo-header {
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid #e5e7eb;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .demo-header {
-      border-bottom-color: #374151;
-    }
-  }
-
-  .demo-title {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #1f2937;
-    margin-bottom: 0.25rem;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .demo-title {
-      color: #f3f4f6;
-    }
-  }
-
-  .demo-description {
-    font-size: 0.75rem;
-    color: #6b7280;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .demo-description {
-      color: #9ca3af;
-    }
-  }
-
-  .demo-content {
-    padding: 1.5rem;
-    display: flex;
-    justify-content: center;
-    min-height: 100px;
-  }
-
-  /* ===== Trigger Button ===== */
-  .trigger-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.625rem 1rem;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
-    font-size: 0.875rem;
-    font-weight: 500;
-    border: none;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: background 0.2s;
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
-  }
-
-  .trigger-button:hover {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  }
-
-  .trigger-button:focus-visible {
-    outline: 2px solid #3b82f6;
-    outline-offset: 2px;
-  }
-
-  /* ===== Arrow Popover Base Styles ===== */
-  .arrow-popover {
-    /* RESET - browsers add default styles that interfere */
-    all: unset;
-
-    /* Anchor positioning */
-    position: absolute;
-    inset: auto;
-
-    /* THE KEY: clip based on margin-box */
-    clip-path: inset(var(--tether-offset)) margin-box;
-
-    /* IMPORTANT: box-shadow MUST be disabled for margin-box clipping to work */
-    box-shadow: none;
-
-    /* Visual styling */
-    display: block;
-    background: #16213e;
-    border-radius: 8px;
-    padding: 1rem;
-    color: #f3f4f6;
-    min-width: 150px;
-    text-align: center;
-
-    /* Animations */
-    opacity: 1;
-    transition-property: opacity, display, overlay;
-    transition-duration: 0.2s;
-    transition-timing-function: ease-out;
-    transition-behavior: allow-discrete;
-  }
-
-  .arrow-popover strong {
-    display: block;
-    margin-bottom: 0.25rem;
-    color: #60a5fa;
-  }
-
-  .arrow-popover p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: #9ca3af;
-  }
-
-  /* Entry animation */
-  @starting-style {
-    .arrow-popover:popover-open {
-      opacity: 0;
-    }
-  }
-
-  /* Exit state */
-  .arrow-popover:not(:popover-open) {
-    opacity: 0;
-  }
-
-  /* ===== Top/Bottom Arrows (::before - vertical hexagon) ===== */
-  .arrow-popover::before {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    background: inherit;
-    left: 50%;
-    transform: translateX(-50%);
-
-    /* Hexagon shape with points at top and bottom */
-    width: calc(var(--tether-size) * 2);
-    height: calc(100% + var(--tether-size) * 2);
-    top: calc(var(--tether-size) * -1);
-    clip-path: polygon(
-      0 var(--tether-size),
-      50% 0,
-      100% var(--tether-size),
-      100% calc(100% - var(--tether-size)),
-      50% 100%,
-      0 calc(100% - var(--tether-size))
-    );
-  }
-
-  /* ===== Left/Right Arrows (::after - horizontal hexagon) ===== */
-  .arrow-popover::after {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    background: inherit;
-    top: 50%;
-    transform: translateY(-50%);
-
-    /* Hexagon shape with points at left and right */
-    height: calc(var(--tether-size) * 2);
-    width: calc(100% + var(--tether-size) * 2);
-    left: calc(var(--tether-size) * -1);
-    clip-path: polygon(
-      var(--tether-size) 0,
-      calc(100% - var(--tether-size)) 0,
-      100% 50%,
-      calc(100% - var(--tether-size)) 100%,
-      var(--tether-size) 100%,
-      0 50%
-    );
-  }
-
-  /* ===== Position-Area Placements (CSS Anchor Positioning) ===== */
-
-  /* --- TOP (centered above) --- */
-  .arrow-popover-top {
-    position-area: top center;
-    margin: 0 0 var(--tether-size) 0;
-    position-try-fallbacks: --bottom, --left, --right;
-  }
-
-  /* --- TOP-START (above, left-aligned) --- */
-  .arrow-popover-top-start {
-    position-area: top span-right;
-    margin: 0 0 var(--tether-size) 0;
-    position-try-fallbacks: --bottom-start, --left-start, --right-start;
-  }
-  .arrow-popover-top-start::before {
-    left: 20%;
-  }
-
-  /* --- TOP-END (above, right-aligned) --- */
-  .arrow-popover-top-end {
-    position-area: top span-left;
-    margin: 0 0 var(--tether-size) 0;
-    position-try-fallbacks: --bottom-end, --left-end, --right-end;
-  }
-  .arrow-popover-top-end::before {
-    left: 80%;
-  }
-
-  /* --- BOTTOM (centered below) --- */
-  .arrow-popover-bottom {
-    position-area: bottom center;
-    margin: var(--tether-size) 0 0 0;
-    position-try-fallbacks: --top, --left, --right;
-  }
-
-  /* --- BOTTOM-START (below, left-aligned) --- */
-  .arrow-popover-bottom-start {
-    position-area: bottom span-right;
-    margin: var(--tether-size) 0 0 0;
-    position-try-fallbacks: --top-start, --left-start, --right-start;
-  }
-  .arrow-popover-bottom-start::before {
-    left: 20%;
-  }
-
-  /* --- BOTTOM-END (below, right-aligned) --- */
-  .arrow-popover-bottom-end {
-    position-area: bottom span-left;
-    margin: var(--tether-size) 0 0 0;
-    position-try-fallbacks: --top-end, --left-end, --right-end;
-  }
-  .arrow-popover-bottom-end::before {
-    left: 80%;
-  }
-
-  /* --- LEFT (centered to the left) --- */
-  .arrow-popover-left {
-    position-area: left center;
-    margin: 0 var(--tether-size) 0 0;
-    position-try-fallbacks: --right, --top, --bottom;
-  }
-
-  /* --- LEFT-START (left, top-aligned) --- */
-  .arrow-popover-left-start {
-    position-area: left span-bottom;
-    margin: 0 var(--tether-size) 0 0;
-    position-try-fallbacks: --right-start, --top-start, --bottom-start;
-  }
-  .arrow-popover-left-start::after {
-    top: 30%;
-  }
-
-  /* --- LEFT-END (left, bottom-aligned) --- */
-  .arrow-popover-left-end {
-    position-area: left span-top;
-    margin: 0 var(--tether-size) 0 0;
-    position-try-fallbacks: --right-end, --top-end, --bottom-end;
-  }
-  .arrow-popover-left-end::after {
-    top: 70%;
-  }
-
-  /* --- RIGHT (centered to the right) --- */
-  .arrow-popover-right {
-    position-area: right center;
-    margin: 0 0 0 var(--tether-size);
-    position-try-fallbacks: --left, --top, --bottom;
-  }
-
-  /* --- RIGHT-START (right, top-aligned) --- */
-  .arrow-popover-right-start {
-    position-area: right span-bottom;
-    margin: 0 0 0 var(--tether-size);
-    position-try-fallbacks: --left-start, --top-start, --bottom-start;
-  }
-  .arrow-popover-right-start::after {
-    top: 30%;
-  }
-
-  /* --- RIGHT-END (right, bottom-aligned) --- */
-  .arrow-popover-right-end {
-    position-area: right span-top;
-    margin: 0 0 0 var(--tether-size);
-    position-try-fallbacks: --left-end, --top-end, --bottom-end;
-  }
-  .arrow-popover-right-end::after {
-    top: 70%;
-  }
-
-  /* ===== @position-try Fallbacks ===== */
-
-  /* Centered fallbacks */
-  @position-try --top {
-    position-area: top center;
-    margin: 0 0 var(--tether-size) 0;
-  }
-
-  @position-try --bottom {
-    position-area: bottom center;
-    margin: var(--tether-size) 0 0 0;
-  }
-
-  @position-try --left {
-    position-area: left center;
-    margin: 0 var(--tether-size) 0 0;
-  }
-
-  @position-try --right {
-    position-area: right center;
-    margin: 0 0 0 var(--tether-size);
-  }
-
-  /* Start-aligned fallbacks */
-  @position-try --top-start {
-    position-area: top span-right;
-    margin: 0 0 var(--tether-size) 0;
-  }
-
-  @position-try --bottom-start {
-    position-area: bottom span-right;
-    margin: var(--tether-size) 0 0 0;
-  }
-
-  @position-try --left-start {
-    position-area: left span-bottom;
-    margin: 0 var(--tether-size) 0 0;
-  }
-
-  @position-try --right-start {
-    position-area: right span-bottom;
-    margin: 0 0 0 var(--tether-size);
-  }
-
-  /* End-aligned fallbacks */
-  @position-try --top-end {
-    position-area: top span-left;
-    margin: 0 0 var(--tether-size) 0;
-  }
-
-  @position-try --bottom-end {
-    position-area: bottom span-left;
-    margin: var(--tether-size) 0 0 0;
-  }
-
-  @position-try --left-end {
-    position-area: left span-top;
-    margin: 0 var(--tether-size) 0 0;
-  }
-
-  @position-try --right-end {
-    position-area: right span-top;
-    margin: 0 0 0 var(--tether-size);
-  }
-
-  /* ===== JS Fallback Styles ===== */
-  /* When using JS fallback, arrows are hidden (can't reliably flip them without CSS Anchor Positioning) */
-
-  .arrow-popover-fallback {
-    /* Don't use clip-path margin-box for fallback */
-    clip-path: none;
-  }
-
-  /* Hide arrows in fallback mode */
-  .arrow-popover-fallback::before,
-  .arrow-popover-fallback::after {
-    display: none;
-  }
-
-  /* ===== Footer ===== */
-  .page-footer {
-    max-width: 1200px;
-    margin: 3rem auto 0;
-    display: grid;
-    gap: 1.5rem;
-  }
-
-  @media (min-width: 900px) {
-    .page-footer {
-      grid-template-columns: 1fr 1fr 1fr;
-    }
-  }
-
-  .info-card {
-    background: white;
-    border-radius: 1rem;
-    padding: 1.5rem 2rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .info-card {
-      background: #1f2937;
-    }
-  }
-
-  .info-card h2 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #1f2937;
-    margin-bottom: 1rem;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .info-card h2 {
-      color: #f3f4f6;
-    }
-  }
-
-  .info-card p {
-    color: #6b7280;
-    margin-bottom: 1rem;
-    line-height: 1.6;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .info-card p {
-      color: #9ca3af;
-    }
-  }
-
-  .info-card ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .info-card li {
-    padding: 0.5rem 0;
-    padding-left: 1.5rem;
-    position: relative;
-    color: #6b7280;
-    line-height: 1.6;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .info-card li {
-      color: #9ca3af;
-    }
-  }
-
-  .info-card li::before {
-    content: '→';
-    position: absolute;
-    left: 0;
-    color: #3b82f6;
-  }
-
-  .info-card code {
-    background: rgba(59, 130, 246, 0.1);
-    color: #3b82f6;
-    padding: 0.125rem 0.375rem;
-    border-radius: 0.25rem;
-    font-size: 0.875em;
-  }
-
-  .warning-box {
-    margin-top: 1rem;
-    padding: 1rem;
-    background: rgba(251, 191, 36, 0.1);
-    border: 1px solid rgba(251, 191, 36, 0.3);
-    border-radius: 0.5rem;
-    color: #92400e;
-    font-size: 0.875rem;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .warning-box {
-      background: rgba(251, 191, 36, 0.05);
-      border-color: rgba(251, 191, 36, 0.2);
-      color: #fbbf24;
-    }
-  }
-
-  .warning-box code {
-    background: rgba(251, 191, 36, 0.2);
-    color: inherit;
-  }
-
-  /* ===== Position Table ===== */
-  .position-table-wrapper {
-    overflow-x: auto;
-    margin-top: 1rem;
-  }
-
-  .position-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.875rem;
-  }
-
-  .position-table th,
-  .position-table td {
-    padding: 0.75rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid #e5e7eb;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .position-table th,
-    .position-table td {
-      border-bottom-color: #374151;
-    }
-  }
-
-  .position-table th {
-    font-weight: 600;
-    color: #1f2937;
-    background: #f9fafb;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .position-table th {
-      color: #f3f4f6;
-      background: #374151;
-    }
-  }
-
-  .position-table td {
-    color: #6b7280;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .position-table td {
-      color: #9ca3af;
-    }
-  }
-`;

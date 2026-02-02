@@ -1,0 +1,712 @@
+/* Dropdown animation styles - these require CSS features not available in Tailwind */
+
+/* ===== Trigger Button Chevron ===== */
+.chevron {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 200ms;
+}
+
+.chevron.open {
+  transform: rotate(180deg);
+}
+
+/* ===== Dropdown Menu Base ===== */
+.dropdown-menu {
+  position: fixed;
+  position-area: block-end;
+  position-try-fallbacks: flip-block;
+  margin: 0;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  min-width: 200px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  
+  /* Required for top layer animations */
+  transition-property: opacity, transform, filter, display, overlay;
+  transition-duration: 250ms;
+  transition-timing-function: ease-out;
+  transition-behavior: allow-discrete;
+}
+
+@media (prefers-color-scheme: dark) {
+  .dropdown-menu {
+    background: #1f2937;
+    border-color: #374151;
+  }
+}
+
+/* Exit state (closed) - common for most animations */
+.dropdown-menu:not(:popover-open) {
+  opacity: 0;
+}
+
+/* ===== Menu Items ===== */
+.menu-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: box-shadow 200ms ease-out;
+  text-align: left;
+  width: 100%;
+  box-shadow: inset 0 0 0 0 rgba(59, 130, 246, 0);
+}
+
+.menu-item:hover {
+  box-shadow: inset 0 0 0 2px rgba(59, 130, 246, 0.15), inset 0 0 12px 0 rgba(59, 130, 246, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  .menu-item:hover {
+    box-shadow: inset 0 0 0 2px rgba(96, 165, 250, 0.25), inset 0 0 12px 0 rgba(96, 165, 250, 0.1);
+  }
+}
+
+.menu-icon {
+  font-size: 1rem;
+}
+
+.menu-label {
+  flex: 1;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+@media (prefers-color-scheme: dark) {
+  .menu-label {
+    color: #e5e7eb;
+  }
+}
+
+.menu-shortcut {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+/* ===== Animation: Fade ===== */
+.dropdown-fade {
+  opacity: 1;
+}
+
+@starting-style {
+  .dropdown-fade:popover-open {
+    opacity: 0;
+  }
+}
+
+.dropdown-fade:not(:popover-open) {
+  opacity: 0;
+}
+
+/* ===== Animation: Scale ===== */
+.dropdown-scale {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@starting-style {
+  .dropdown-scale:popover-open {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+.dropdown-scale:not(:popover-open) {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+/* ===== Animation: Slide Down ===== */
+.dropdown-slide-down {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@starting-style {
+  .dropdown-slide-down:popover-open {
+    opacity: 0;
+    transform: translateY(-1rem);
+  }
+}
+
+.dropdown-slide-down:not(:popover-open) {
+  opacity: 0;
+  transform: translateY(-1rem);
+}
+
+/* ===== Animation: Slide Up ===== */
+.dropdown-slide-up {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@starting-style {
+  .dropdown-slide-up:popover-open {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+}
+
+.dropdown-slide-up:not(:popover-open) {
+  opacity: 0;
+  transform: translateY(1rem);
+}
+
+/* ===== Animation: Slide Left ===== */
+.dropdown-slide-left {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+@starting-style {
+  .dropdown-slide-left:popover-open {
+    opacity: 0;
+    transform: translateX(1rem);
+  }
+}
+
+.dropdown-slide-left:not(:popover-open) {
+  opacity: 0;
+  transform: translateX(1rem);
+}
+
+/* ===== Animation: Slide Right ===== */
+.dropdown-slide-right {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+@starting-style {
+  .dropdown-slide-right:popover-open {
+    opacity: 0;
+    transform: translateX(-1rem);
+  }
+}
+
+.dropdown-slide-right:not(:popover-open) {
+  opacity: 0;
+  transform: translateX(-1rem);
+}
+
+/* ===== Animation: Flip ===== */
+.dropdown-flip {
+  opacity: 1;
+  transform: perspective(600px) rotateX(0deg);
+  transform-origin: top center;
+  transition-duration: 350ms;
+  transition-timing-function: ease-out;
+}
+
+@starting-style {
+  .dropdown-flip:popover-open {
+    opacity: 0;
+    transform: perspective(600px) rotateX(-90deg);
+  }
+}
+
+.dropdown-flip:not(:popover-open) {
+  opacity: 0;
+  transform: perspective(600px) rotateX(-90deg);
+}
+
+/* ===== Animation: Bounce ===== */
+.dropdown-bounce {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  animation: bounceIn 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateY(-20px);
+  }
+  50% {
+    transform: scale(1.05) translateY(0);
+  }
+  70% {
+    transform: scale(0.95) translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@starting-style {
+  .dropdown-bounce:popover-open {
+    opacity: 0;
+    transform: scale(0.3) translateY(-20px);
+  }
+}
+
+.dropdown-bounce:not(:popover-open) {
+  opacity: 0;
+  transform: scale(0.8);
+  transition-duration: 150ms;
+}
+
+/* ===== Animation: Elastic ===== */
+.dropdown-elastic {
+  opacity: 1;
+  transform: scaleY(1);
+  transform-origin: top center;
+  transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transition-duration: 400ms;
+}
+
+@starting-style {
+  .dropdown-elastic:popover-open {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+}
+
+.dropdown-elastic:not(:popover-open) {
+  opacity: 0;
+  transform: scaleY(0);
+  transition-duration: 200ms;
+  transition-timing-function: ease-in;
+}
+
+/* ===== Animation: Rotate ===== */
+.dropdown-rotate {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+  transition-duration: 350ms;
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@starting-style {
+  .dropdown-rotate:popover-open {
+    opacity: 0;
+    transform: rotate(-180deg) scale(0.5);
+  }
+}
+
+.dropdown-rotate:not(:popover-open) {
+  opacity: 0;
+  transform: rotate(180deg) scale(0.5);
+  transition-duration: 250ms;
+  transition-timing-function: ease-in;
+}
+
+/* ===== Animation: Perspective Tilt ===== */
+.dropdown-perspective-tilt {
+  opacity: 1;
+  transform: perspective(800px) rotateY(0deg) rotateX(0deg);
+  transform-origin: top left;
+  transition-duration: 400ms;
+  transition-timing-function: ease-out;
+}
+
+@starting-style {
+  .dropdown-perspective-tilt:popover-open {
+    opacity: 0;
+    transform: perspective(800px) rotateY(30deg) rotateX(-15deg);
+  }
+}
+
+.dropdown-perspective-tilt:not(:popover-open) {
+  opacity: 0;
+  transform: perspective(800px) rotateY(30deg) rotateX(-15deg);
+}
+
+/* ===== Animation: Blur ===== */
+.dropdown-blur {
+  opacity: 1;
+  filter: blur(0);
+  transform: scale(1);
+  transition-duration: 300ms;
+}
+
+@starting-style {
+  .dropdown-blur:popover-open {
+    opacity: 0;
+    filter: blur(10px);
+    transform: scale(1.1);
+  }
+}
+
+.dropdown-blur:not(:popover-open) {
+  opacity: 0;
+  filter: blur(10px);
+  transform: scale(1.1);
+}
+
+/* ===== Animation: Grow from Anchor ===== */
+.dropdown-grow-from-anchor {
+  opacity: 1;
+  transform: scaleX(1) scaleY(1);
+  transform-origin: top center;
+  transition-duration: 300ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@starting-style {
+  .dropdown-grow-from-anchor:popover-open {
+    opacity: 0;
+    transform: scaleX(0.5) scaleY(0);
+  }
+}
+
+.dropdown-grow-from-anchor:not(:popover-open) {
+  opacity: 0;
+  transform: scaleX(0.5) scaleY(0);
+  transition-duration: 200ms;
+  transition-timing-function: ease-in;
+}
+
+/* ===== Animation: Glitch ===== */
+.dropdown-glitch {
+  opacity: 1;
+  animation: glitchIn 400ms steps(8);
+}
+
+@keyframes glitchIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-5px);
+    clip-path: inset(0 0 100% 0);
+  }
+  10% {
+    transform: translateX(5px);
+    clip-path: inset(0 0 80% 0);
+  }
+  20% {
+    transform: translateX(-3px);
+    clip-path: inset(0 0 60% 0);
+  }
+  30% {
+    transform: translateX(3px);
+    clip-path: inset(0 0 40% 0);
+  }
+  40% {
+    transform: translateX(-2px);
+    clip-path: inset(0 0 20% 0);
+  }
+  50% {
+    transform: translateX(2px);
+    clip-path: inset(0 0 10% 0);
+  }
+  60% {
+    transform: translateX(-1px);
+  }
+  70% {
+    transform: translateX(1px);
+  }
+  80%, 100% {
+    opacity: 1;
+    transform: translateX(0);
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@starting-style {
+  .dropdown-glitch:popover-open {
+    opacity: 0;
+    clip-path: inset(0 0 100% 0);
+  }
+}
+
+.dropdown-glitch:not(:popover-open) {
+  opacity: 0;
+  clip-path: inset(0 0 100% 0);
+  transition-duration: 150ms;
+}
+
+/* ===== Animation: Swing ===== */
+.dropdown-swing {
+  opacity: 1;
+  transform: rotate(0deg);
+  transform-origin: top center;
+  animation: swingIn 600ms ease-out;
+}
+
+@keyframes swingIn {
+  0% {
+    opacity: 0;
+    transform: rotate(-30deg);
+  }
+  30% {
+    transform: rotate(15deg);
+  }
+  50% {
+    transform: rotate(-10deg);
+  }
+  70% {
+    transform: rotate(5deg);
+  }
+  85% {
+    transform: rotate(-2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(0deg);
+  }
+}
+
+@starting-style {
+  .dropdown-swing:popover-open {
+    opacity: 0;
+    transform: rotate(-30deg);
+  }
+}
+
+.dropdown-swing:not(:popover-open) {
+  opacity: 0;
+  transform: rotate(10deg);
+  transition-duration: 200ms;
+}
+
+/* ===== Animation: Unfold ===== */
+.dropdown-unfold {
+  opacity: 1;
+  transform: scaleY(1);
+  transform-origin: top center;
+  transition-duration: 350ms;
+  transition-timing-function: ease-out;
+}
+
+.dropdown-unfold .menu-items {
+  animation: unfoldItems 500ms ease-out forwards;
+}
+
+@keyframes unfoldItems {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@starting-style {
+  .dropdown-unfold:popover-open {
+    opacity: 0.5;
+    transform: scaleY(0.1);
+  }
+}
+
+.dropdown-unfold:not(:popover-open) {
+  opacity: 0;
+  transform: scaleY(0.1);
+  transition-duration: 200ms;
+}
+
+/* ===== Animation: Liquid Glass ===== */
+.dropdown-liquid-glass {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4);
+  animation: liquidGlassIn 500ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes liquidGlassIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+    backdrop-filter: blur(0px) saturate(100%);
+    -webkit-backdrop-filter: blur(0px) saturate(100%);
+  }
+  50% {
+    backdrop-filter: blur(25px) saturate(200%);
+    -webkit-backdrop-filter: blur(25px) saturate(200%);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+  }
+}
+
+@starting-style {
+  .dropdown-liquid-glass:popover-open {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+}
+
+.dropdown-liquid-glass:not(:popover-open) {
+  opacity: 0;
+  transform: scale(0.98) translateY(-5px);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  transition-duration: 250ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  .dropdown-liquid-glass {
+    background: rgba(31, 41, 55, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+      inset 0 2px 4px rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* ===== Animation: Liquid Morph ===== */
+.dropdown-liquid-morph {
+  opacity: 1;
+  border-radius: 0.75rem;
+  animation: liquidMorphIn 600ms ease-out;
+}
+
+@keyframes liquidMorphIn {
+  0% {
+    opacity: 0;
+    border-radius: 50%;
+    transform: scale(0.3);
+    filter: blur(10px);
+  }
+  30% {
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+    transform: scale(0.7);
+    filter: blur(5px);
+  }
+  50% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    transform: scale(0.9);
+    filter: blur(2px);
+  }
+  70% {
+    border-radius: 40% 60% 50% 50% / 50% 50% 50% 50%;
+    transform: scale(1.02);
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    border-radius: 0.75rem;
+    transform: scale(1);
+    filter: blur(0px);
+  }
+}
+
+@starting-style {
+  .dropdown-liquid-morph:popover-open {
+    opacity: 0;
+    transform: scale(0.3);
+    border-radius: 50%;
+  }
+}
+
+.dropdown-liquid-morph:not(:popover-open) {
+  opacity: 0;
+  transform: scale(0.5);
+  border-radius: 50%;
+  filter: blur(5px);
+  transition-duration: 200ms;
+}
+
+/* ===== Animation: Prismatic ===== */
+.dropdown-prismatic {
+  opacity: 1;
+  transform: scale(1);
+  position: relative;
+  animation: prismaticIn 500ms ease-out;
+  box-shadow:
+    -2px 0 8px rgba(255, 0, 0, 0.2),
+    2px 0 8px rgba(0, 0, 255, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-prismatic::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 0, 0, 0.05) 0%,
+    rgba(255, 255, 0, 0.05) 25%,
+    rgba(0, 255, 0, 0.05) 50%,
+    rgba(0, 255, 255, 0.05) 75%,
+    rgba(0, 0, 255, 0.05) 100%
+  );
+  opacity: 0;
+  animation: prismaticShimmer 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.dropdown-prismatic:popover-open::before {
+  opacity: 1;
+}
+
+@keyframes prismaticIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) rotate(-2deg);
+    box-shadow:
+      -10px 0 20px rgba(255, 0, 0, 0.4),
+      10px 0 20px rgba(0, 0, 255, 0.4),
+      0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    box-shadow:
+      -5px 0 15px rgba(255, 0, 0, 0.3),
+      5px 0 15px rgba(0, 0, 255, 0.3),
+      0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+    box-shadow:
+      -2px 0 8px rgba(255, 0, 0, 0.2),
+      2px 0 8px rgba(0, 0, 255, 0.2),
+      0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@keyframes prismaticShimmer {
+  0%, 100% {
+    background-position: 0% 50%;
+    filter: hue-rotate(0deg);
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: hue-rotate(30deg);
+  }
+}
+
+@starting-style {
+  .dropdown-prismatic:popover-open {
+    opacity: 0;
+    transform: scale(0.9) rotate(-2deg);
+  }
+}
+
+.dropdown-prismatic:not(:popover-open) {
+  opacity: 0;
+  transform: scale(0.95);
+  box-shadow:
+    -8px 0 16px rgba(255, 0, 0, 0.3),
+    8px 0 16px rgba(0, 0, 255, 0.3),
+    0 4px 16px rgba(0, 0, 0, 0.1);
+  transition-duration: 200ms;
+}

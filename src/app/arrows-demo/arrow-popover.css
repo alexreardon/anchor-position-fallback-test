@@ -1,0 +1,297 @@
+/* CSS Anchor Positioning: Auto-Flipping Arrows with Popovers */
+/* Based on: https://gist.github.com/alexreardon/2008517fcbebe03f1e41e10b4104174c */
+
+/* ===== Arrow Popover Base Styles ===== */
+.arrow-popover {
+  /* RESET - browsers add default styles that interfere */
+  all: unset;
+
+  /* CSS Variables for arrow sizing */
+  --tether-offset: 1px;
+  --tether-size: 8px;
+
+  /* Anchor positioning */
+  position: absolute;
+  inset: auto; /* Reset default inset: 0 */
+
+  /* THE KEY: clip based on margin-box */
+  clip-path: inset(var(--tether-offset)) margin-box;
+
+  /* IMPORTANT: box-shadow MUST be disabled for margin-box clipping to work */
+  box-shadow: none;
+
+  /* Visual styling */
+  display: block;
+  background: #16213e;
+  border-radius: 8px;
+  padding: 1rem;
+  color: #f3f4f6;
+  min-width: 150px;
+  text-align: center;
+
+  /* Animations */
+  opacity: 1;
+  transition-property: opacity, display, overlay;
+  transition-duration: 200ms;
+  transition-timing-function: ease-out;
+  transition-behavior: allow-discrete;
+}
+
+.arrow-popover strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #60a5fa;
+}
+
+.arrow-popover p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #9ca3af;
+}
+
+/* Entry animation */
+@starting-style {
+  .arrow-popover:popover-open {
+    opacity: 0;
+  }
+}
+
+/* Exit state */
+.arrow-popover:not(:popover-open) {
+  opacity: 0;
+}
+
+/* ===== Top/Bottom Arrows (::before - vertical hexagon) ===== */
+.arrow-popover::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  background: inherit;
+  left: 50%;
+  transform: translateX(-50%);
+
+  /* Hexagon shape with points at top and bottom */
+  width: calc(var(--tether-size) * 2);
+  height: calc(100% + var(--tether-size) * 2);
+  top: calc(var(--tether-size) * -1);
+  clip-path: polygon(
+    0 var(--tether-size),
+    50% 0,
+    100% var(--tether-size),
+    100% calc(100% - var(--tether-size)),
+    50% 100%,
+    0 calc(100% - var(--tether-size))
+  );
+}
+
+/* ===== Left/Right Arrows (::after - horizontal hexagon) ===== */
+.arrow-popover::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  background: inherit;
+  top: 50%;
+  transform: translateY(-50%);
+
+  /* Hexagon shape with points at left and right */
+  height: calc(var(--tether-size) * 2);
+  width: calc(100% + var(--tether-size) * 2);
+  left: calc(var(--tether-size) * -1);
+  clip-path: polygon(
+    var(--tether-size) 0,
+    calc(100% - var(--tether-size)) 0,
+    100% 50%,
+    calc(100% - var(--tether-size)) 100%,
+    var(--tether-size) 100%,
+    0 50%
+  );
+}
+
+/* ===== Position-Area Placements (CSS Anchor Positioning) ===== */
+
+/* --- TOP (centered above) --- */
+.arrow-popover-top {
+  position-area: top center;
+  margin: 0 0 var(--tether-size) 0;
+  position-try-fallbacks: --bottom, --left, --right;
+}
+
+/* --- TOP-START (above, left-aligned) --- */
+.arrow-popover-top-start {
+  position-area: top span-right;
+  margin: 0 0 var(--tether-size) 0;
+  position-try-fallbacks: --bottom-start, --left-start, --right-start;
+}
+.arrow-popover-top-start::before {
+  left: 20%;
+}
+
+/* --- TOP-END (above, right-aligned) --- */
+.arrow-popover-top-end {
+  position-area: top span-left;
+  margin: 0 0 var(--tether-size) 0;
+  position-try-fallbacks: --bottom-end, --left-end, --right-end;
+}
+.arrow-popover-top-end::before {
+  left: 80%;
+}
+
+/* --- BOTTOM (centered below) --- */
+.arrow-popover-bottom {
+  position-area: bottom center;
+  margin: var(--tether-size) 0 0 0;
+  position-try-fallbacks: --top, --left, --right;
+}
+
+/* --- BOTTOM-START (below, left-aligned) --- */
+.arrow-popover-bottom-start {
+  position-area: bottom span-right;
+  margin: var(--tether-size) 0 0 0;
+  position-try-fallbacks: --top-start, --left-start, --right-start;
+}
+.arrow-popover-bottom-start::before {
+  left: 20%;
+}
+
+/* --- BOTTOM-END (below, right-aligned) --- */
+.arrow-popover-bottom-end {
+  position-area: bottom span-left;
+  margin: var(--tether-size) 0 0 0;
+  position-try-fallbacks: --top-end, --left-end, --right-end;
+}
+.arrow-popover-bottom-end::before {
+  left: 80%;
+}
+
+/* --- LEFT (centered to the left) --- */
+.arrow-popover-left {
+  position-area: left center;
+  margin: 0 var(--tether-size) 0 0;
+  position-try-fallbacks: --right, --top, --bottom;
+}
+
+/* --- LEFT-START (left, top-aligned) --- */
+.arrow-popover-left-start {
+  position-area: left span-bottom;
+  margin: 0 var(--tether-size) 0 0;
+  position-try-fallbacks: --right-start, --top-start, --bottom-start;
+}
+.arrow-popover-left-start::after {
+  top: 30%;
+}
+
+/* --- LEFT-END (left, bottom-aligned) --- */
+.arrow-popover-left-end {
+  position-area: left span-top;
+  margin: 0 var(--tether-size) 0 0;
+  position-try-fallbacks: --right-end, --top-end, --bottom-end;
+}
+.arrow-popover-left-end::after {
+  top: 70%;
+}
+
+/* --- RIGHT (centered to the right) --- */
+.arrow-popover-right {
+  position-area: right center;
+  margin: 0 0 0 var(--tether-size);
+  position-try-fallbacks: --left, --top, --bottom;
+}
+
+/* --- RIGHT-START (right, top-aligned) --- */
+.arrow-popover-right-start {
+  position-area: right span-bottom;
+  margin: 0 0 0 var(--tether-size);
+  position-try-fallbacks: --left-start, --top-start, --bottom-start;
+}
+.arrow-popover-right-start::after {
+  top: 30%;
+}
+
+/* --- RIGHT-END (right, bottom-aligned) --- */
+.arrow-popover-right-end {
+  position-area: right span-top;
+  margin: 0 0 0 var(--tether-size);
+  position-try-fallbacks: --left-end, --top-end, --bottom-end;
+}
+.arrow-popover-right-end::after {
+  top: 70%;
+}
+
+/* ===== @position-try Fallbacks ===== */
+
+/* Centered fallbacks */
+@position-try --top {
+  position-area: top center;
+  margin: 0 0 var(--tether-size) 0;
+}
+
+@position-try --bottom {
+  position-area: bottom center;
+  margin: var(--tether-size) 0 0 0;
+}
+
+@position-try --left {
+  position-area: left center;
+  margin: 0 var(--tether-size) 0 0;
+}
+
+@position-try --right {
+  position-area: right center;
+  margin: 0 0 0 var(--tether-size);
+}
+
+/* Start-aligned fallbacks */
+@position-try --top-start {
+  position-area: top span-right;
+  margin: 0 0 var(--tether-size) 0;
+}
+
+@position-try --bottom-start {
+  position-area: bottom span-right;
+  margin: var(--tether-size) 0 0 0;
+}
+
+@position-try --left-start {
+  position-area: left span-bottom;
+  margin: 0 var(--tether-size) 0 0;
+}
+
+@position-try --right-start {
+  position-area: right span-bottom;
+  margin: 0 0 0 var(--tether-size);
+}
+
+/* End-aligned fallbacks */
+@position-try --top-end {
+  position-area: top span-left;
+  margin: 0 0 var(--tether-size) 0;
+}
+
+@position-try --bottom-end {
+  position-area: bottom span-left;
+  margin: var(--tether-size) 0 0 0;
+}
+
+@position-try --left-end {
+  position-area: left span-top;
+  margin: 0 var(--tether-size) 0 0;
+}
+
+@position-try --right-end {
+  position-area: right span-top;
+  margin: 0 0 0 var(--tether-size);
+}
+
+/* ===== JS Fallback Styles ===== */
+/* When using JS fallback, arrows are hidden (can't reliably flip them without CSS Anchor Positioning) */
+
+.arrow-popover-fallback {
+  /* Don't use clip-path margin-box for fallback */
+  clip-path: none;
+}
+
+/* Hide arrows in fallback mode */
+.arrow-popover-fallback::before,
+.arrow-popover-fallback::after {
+  display: none;
+}
