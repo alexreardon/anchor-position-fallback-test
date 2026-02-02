@@ -191,6 +191,9 @@ export default function ArrowsDemoPage() {
             />
             <span>Force JS fallback</span>
           </label>
+          <div className={`fallback-notice ${forceFallback ? 'fallback-notice-active' : ''}`}>
+            Arrows hidden in fallback mode
+          </div>
           <div className="select-group">
             <span className="select-label">Fallback Strategy</span>
             <select
@@ -436,6 +439,36 @@ const arrowStyles = `
     border-radius: 0.25rem;
     border: 1px solid #d1d5db;
     accent-color: #3b82f6;
+  }
+
+  .fallback-notice {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    background: rgba(156, 163, 175, 0.1);
+    padding: 0.375rem 0.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid rgba(156, 163, 175, 0.2);
+    transition: all 0.2s ease;
+  }
+
+  .fallback-notice-active {
+    color: #b45309;
+    background: rgba(251, 191, 36, 0.15);
+    border-color: rgba(251, 191, 36, 0.3);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .fallback-notice {
+      color: #6b7280;
+      background: rgba(107, 114, 128, 0.1);
+      border-color: rgba(107, 114, 128, 0.2);
+    }
+
+    .fallback-notice-active {
+      color: #fbbf24;
+      background: rgba(251, 191, 36, 0.1);
+      border-color: rgba(251, 191, 36, 0.2);
+    }
   }
 
   .select-group {
