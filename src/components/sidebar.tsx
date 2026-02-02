@@ -14,6 +14,7 @@ import {
   AlertTriangle,
   FlaskConical,
   Bell,
+  Layers,
 } from 'lucide-react';
 
 type SidebarContextType = {
@@ -38,7 +39,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
 
   return (
     <SidebarContext.Provider value={{ isCollapsed, toggle }}>
-      <div className="flex min-h-screen">
+      <div className="flex h-screen overflow-hidden">
         <Sidebar />
         <main className="flex-1 overflow-auto">{children}</main>
       </div>
@@ -76,6 +77,12 @@ const navItems = [
     label: 'Toast',
     icon: Bell,
     description: 'Toast notifications',
+  },
+  {
+    href: '/nested-popovers-demo',
+    label: 'Nested Popovers',
+    icon: Layers,
+    description: 'Popover stacking & light dismiss',
   },
   {
     href: '/fallback-test',
