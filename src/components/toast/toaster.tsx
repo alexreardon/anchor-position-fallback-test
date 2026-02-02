@@ -55,12 +55,15 @@ function ToastItem({
   const isTop = position.startsWith('top');
   const offset = index * 60; // Each toast is ~56px + gap
 
+  // Use a simple numeric view transition name
+  const toastNum = toast.id.replace('toast-', '');
+
   return (
     <div
       ref={ref}
       className={`toast-item ${typeColors[toast.type]}`}
       style={{
-        viewTransitionName: `toast-${toast.id}`,
+        viewTransitionName: `toast${toastNum}`,
         '--toast-index': index,
         '--toast-offset': `${offset}px`,
       } as React.CSSProperties}
