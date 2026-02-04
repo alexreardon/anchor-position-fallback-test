@@ -3,6 +3,8 @@
 import { type ReactNode, type RefObject, useState } from 'react';
 import { Popover, type TPosition, type TFallbackStrategy } from './popover';
 
+export type { TPosition, TFallbackStrategy };
+
 /**
  * A tooltip component built on top of Popover.
  * Shows on hover/focus of the trigger element.
@@ -33,7 +35,6 @@ export function Tooltip({
       position={position}
       linkToTrigger="description"
       role="tooltip"
-      mode="auto"
       fallbackStrategy={fallbackStrategy}
       onDismiss={() => onOpenChange(false)}
     >

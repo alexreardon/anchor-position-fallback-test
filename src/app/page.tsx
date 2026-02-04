@@ -1,47 +1,17 @@
 'use client';
 
-import { useRef, useId, useLayoutEffect, useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Anchor, Layers, Zap, ArrowRight, Code2, Info } from 'lucide-react';
-import invariant from 'tiny-invariant';
 import { supportsAnchorPositioning } from '@/utils/supports-anchor-positioning';
-import { setStyle } from '@/utils/set-style';
-import { combine } from '@/utils/combine';
-import { bindFallbackPositioning } from '@/utils/fallback-positioning';
+import { Popover } from '@/components/popover';
+import { tw } from '@/utils/tw';
+
+const demoPopoverClassName = tw`m-0 rounded-xl border border-gray-200 bg-white p-4 shadow-xl dark:border-gray-700 dark:bg-gray-800`;
 
 function LiveAnchorDemo() {
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const popoverRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const id = useId();
-
-  useLayoutEffect(() => {
-    if (!isOpen) return;
-
-    const popover = popoverRef.current;
-    const trigger = triggerRef.current;
-    invariant(popover && trigger);
-
-    const cleanupFns: (() => void)[] = [];
-    const useNative = supportsAnchorPositioning();
-
-    if (useNative) {
-      const anchorName = `--demo-anchor-${CSS.escape(id)}`;
-      cleanupFns.push(
-        setStyle(trigger, { property: 'anchor-name', value: anchorName }),
-        setStyle(popover, { property: 'position-anchor', value: anchorName }),
-      );
-    } else {
-      cleanupFns.push(
-        bindFallbackPositioning(popover, trigger, 'block-end', 'update-on-change'),
-      );
-    }
-
-    popover.showPopover();
-    cleanupFns.push(() => popover.hidePopover());
-
-    return combine(...cleanupFns);
-  }, [isOpen, id]);
 
   return (
     <div className="relative flex flex-col items-center gap-4">
@@ -49,27 +19,18 @@ function LiveAnchorDemo() {
         ref={triggerRef}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-500/25 transition-all hover:from-blue-600 hover:to-blue-700 hover:shadow-blue-500/40"
+        className="inline-flex items-center gap-2 rounded-lg bg-linear-to-br from-blue-500 to-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-500/25 transition-all hover:from-blue-600 hover:to-blue-700 hover:shadow-blue-500/40"
       >
         <Anchor className="h-4 w-4" />
         {isOpen ? 'Hide Popover' : 'Show Popover'}
       </button>
       {isOpen && (
-        <div
-          ref={popoverRef}
-          id={id}
-          popover="auto"
-          onToggle={(e) => {
-            if (e.newState === 'closed') setIsOpen(false);
-          }}
-          className="m-0 rounded-xl border border-gray-200 bg-white p-4 shadow-xl dark:border-gray-700 dark:bg-gray-800"
-          style={{
-            position: 'fixed',
-            inset: 'unset',
-            top: 'anchor(bottom)',
-            left: 'anchor(center)',
-            translate: '-50% 8px',
-          }}
+        <Popover
+          triggerRef={triggerRef}
+          position="block-end"
+          linkToTrigger="none"
+          className={demoPopoverClassName}
+          onDismiss={() => setIsOpen(false)}
         >
           <div className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
             <Zap className="h-4 w-4 text-amber-500" />
@@ -78,7 +39,7 @@ function LiveAnchorDemo() {
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
             Using CSS Anchor Positioning
           </p>
-        </div>
+        </Popover>
       )}
     </div>
   );
@@ -137,7 +98,7 @@ function BrowserSupportBadge() {
 
 export default function HomePage() {
   return (
-    <div className="flex min-h-full flex-col overflow-auto bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="flex min-h-full flex-col overflow-auto bg-linear-to-br from-gray-50 to-gray-100 dark:from-slate-900 dark:to-slate-800">
       {/* Hero Section */}
       <header className="flex flex-col items-center px-8 pb-12 pt-16 text-center">
         <div className="mb-6 inline-flex rounded-full bg-blue-100 p-3 dark:bg-blue-500/20">
@@ -195,7 +156,7 @@ export default function HomePage() {
       <section className="px-8 pb-16">
         <div className="mx-auto max-w-2xl">
           <div className="flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50 p-5 dark:border-blue-500/30 dark:bg-blue-500/10">
-            <Info className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+            <Info className="mt-0.5 h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" />
             <div>
               <h3 className="mb-1 font-semibold text-blue-800 dark:text-blue-300">
                 About This Project

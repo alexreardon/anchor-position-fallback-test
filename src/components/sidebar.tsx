@@ -79,10 +79,10 @@ const navItems = [
     description: 'Toast notifications',
   },
   {
-    href: '/nested-popovers-demo',
-    label: 'Nested Popovers',
+    href: '/popover-auto-demo',
+    label: 'Popover Auto',
     icon: Layers,
-    description: 'Popover stacking & light dismiss',
+    description: 'Nested popovers & light dismiss',
   },
   {
     href: '/fallback-test',

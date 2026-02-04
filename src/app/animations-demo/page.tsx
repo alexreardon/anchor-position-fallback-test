@@ -1,13 +1,8 @@
 'use client';
 
-import { useRef, useState, useId, useLayoutEffect, type ReactNode } from 'react';
-import invariant from 'tiny-invariant';
+import { useRef, useState } from 'react';
 import { ChevronDown, Copy, Scissors, ClipboardPaste, Trash2, Undo2, ArrowRight, Info } from 'lucide-react';
-import { combine } from '@/utils/combine';
-import { setStyle } from '@/utils/set-style';
-import { setAttribute } from '@/utils/set-attribute';
-import { supportsAnchorPositioning } from '@/utils/supports-anchor-positioning';
-import { bindFallbackPositioning } from '@/utils/fallback-positioning';
+import { Popover } from '@/components/popover';
 import './dropdown-animations.css';
 
 type AnimationStyle =
@@ -61,82 +56,6 @@ const menuItems = [
   { icon: Undo2, label: 'Undo', shortcut: '⌘Z' },
 ];
 
-function AnimatedDropdown({
-  animation,
-  children,
-  triggerRef,
-  isOpen,
-  onClose,
-}: {
-  animation: AnimationStyle;
-  children: ReactNode;
-  triggerRef: React.RefObject<HTMLButtonElement | null>;
-  isOpen: boolean;
-  onClose: () => void;
-}) {
-  const popoverRef = useRef<HTMLDivElement>(null);
-  const id = useId();
-
-  useLayoutEffect(() => {
-    if (!isOpen) return;
-
-    const popover = popoverRef.current;
-    const trigger = triggerRef.current;
-    invariant(popover && trigger);
-
-    const cleanupFns: (() => void)[] = [];
-
-    cleanupFns.push(
-      setAttribute(trigger, { attribute: 'aria-controls', value: id }),
-      setAttribute(trigger, { attribute: 'aria-expanded', value: 'true' }),
-    );
-
-    const useNativePositioning = supportsAnchorPositioning();
-
-    if (useNativePositioning) {
-      const existingAnchorName = trigger.style.getPropertyValue('anchor-name');
-      const triggerAnchorName = existingAnchorName || `--anchor-${CSS.escape(id)}`;
-
-      cleanupFns.push(
-        setStyle(trigger, { property: 'anchor-name', value: triggerAnchorName }),
-        setStyle(popover, { property: 'position-anchor', value: triggerAnchorName }),
-      );
-    } else {
-      cleanupFns.push(
-        bindFallbackPositioning(popover, trigger, 'block-end', 'update-on-change'),
-      );
-    }
-
-    popover.showPopover();
-    cleanupFns.push(() => popover.hidePopover());
-
-    cleanupFns.push(() => {
-      trigger.removeAttribute('aria-expanded');
-    });
-
-    return combine(...cleanupFns);
-  }, [isOpen, id, triggerRef]);
-
-  if (!isOpen) return null;
-
-  return (
-    <div
-      ref={popoverRef}
-      id={id}
-      role="menu"
-      popover="auto"
-      onToggle={(e) => {
-        if (e.newState === 'closed') {
-          onClose();
-        }
-      }}
-      className={`dropdown-menu dropdown-${animation}`}
-    >
-      {children}
-    </div>
-  );
-}
-
 function DropdownDemo({ animation }: { animation: AnimationStyle }) {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -157,35 +76,41 @@ function DropdownDemo({ animation }: { animation: AnimationStyle }) {
           onClick={() => setIsOpen(!isOpen)}
           className="inline-flex items-center gap-2 rounded-lg bg-linear-to-br from-blue-500 to-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:from-blue-600 hover:to-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
           aria-haspopup="menu"
+          aria-expanded={isOpen}
         >
           <span>Show dropdown</span>
           <ChevronDown className={`chevron ${isOpen ? 'open' : ''}`} />
         </button>
-        <AnimatedDropdown
-          animation={animation}
-          triggerRef={triggerRef}
-          isOpen={isOpen}
-          onClose={() => setIsOpen(false)}
-        >
-          <div className="menu-items">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.label}
-                  type="button"
-                  role="menuitem"
-                  className="menu-item"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <Icon className="menu-icon" />
-                  <span className="menu-label">{item.label}</span>
-                  <span className="menu-shortcut">{item.shortcut}</span>
-                </button>
-              );
-            })}
-          </div>
-        </AnimatedDropdown>
+
+        {isOpen && (
+          <Popover
+            triggerRef={triggerRef}
+            position="block-end"
+            linkToTrigger="name"
+            role="menu"
+            className={`dropdown-menu dropdown-${animation}`}
+            onDismiss={() => setIsOpen(false)}
+          >
+            <div className="menu-items">
+              {menuItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.label}
+                    type="button"
+                    role="menuitem"
+                    className="menu-item"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <Icon className="menu-icon" />
+                    <span className="menu-label">{item.label}</span>
+                    <span className="menu-shortcut">{item.shortcut}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </Popover>
+        )}
       </div>
     </div>
   );
@@ -221,7 +146,7 @@ export default function AnimationsDemoPage() {
       {/* Info section */}
       <footer className="mx-auto mt-12 max-w-5xl">
         <div className="flex items-start gap-3 rounded-2xl bg-white p-6 shadow-md dark:bg-gray-800">
-          <Info className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-500" />
+          <Info className="mt-0.5 h-5 w-5 shrink-0 text-blue-500" />
           <div>
             <h2 className="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100">
               How it works
@@ -259,7 +184,7 @@ export default function AnimationsDemoPage() {
                 </>,
               ].map((item, i) => (
                 <li key={i} className="flex gap-2 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
-                  <ArrowRight className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-500" />
+                  <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
                   <span>{item}</span>
                 </li>
               ))}

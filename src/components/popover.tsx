@@ -24,13 +24,14 @@ import { bindFallbackPositioning, type TFallbackStrategy } from '@/utils/fallbac
 export type TPosition = 'inline-end' | 'block-end' | 'block-end-trigger-inline-start';
 export type { TFallbackStrategy } from '@/utils/fallback-positioning';
 
-type TLinkToTrigger = 'name' | 'description';
+type TLinkToTrigger = 'name' | 'description' | 'none';
 type TMode = Exclude<HTMLAttributes<HTMLDivElement>['popover'], '' | undefined>;
 
 const attribute = {
   name: 'aria-labelledby',
   description: 'aria-describedby',
-} satisfies { [TKey in TLinkToTrigger]: string };
+  none: null,
+} satisfies { [TKey in TLinkToTrigger]: string | null };
 
 /**
  * CSS classes for native anchor positioning.
@@ -43,43 +44,57 @@ const anchorPositionStyles: { [TKey in TPosition]: string } = {
 };
 
 /**
+ * Default styling for popovers.
+ */
+const defaultPopoverClassName = tw`m-0 rounded border border-gray-200 bg-white p-2 font-normal shadow-lg dark:border-gray-700 dark:bg-gray-800`;
+
+/**
  * A popover component that can be used to power tooltips, dropdown menus,
  * and other floating UI elements.
  *
  * Uses CSS Anchor Positioning when available, with a JavaScript fallback
  * for browsers that don't support it.
+ *
+ * For nested popovers (like submenus), the nesting is determined by DOM structure:
+ * - When a child popover element is inside a parent popover element, the browser
+ *   recognizes them as nested.
+ * - Pressing Escape closes only the topmost (innermost) popover.
+ * - Light dismiss (clicking outside) closes the entire stack.
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/Popover_API/Using#nested_popovers
  */
 export function Popover({
   ref,
   triggerRef,
   position,
   children,
-  linkToTrigger,
+  linkToTrigger = 'description',
   role,
-  mode,
+  mode = 'auto',
   testId,
   fallbackStrategy,
+  className,
   onDismiss,
 }: {
   ref?: Ref<HTMLDivElement>;
   triggerRef: RefObject<HTMLElement | null>;
   position: TPosition;
   children: ReactNode;
-  linkToTrigger: TLinkToTrigger;
-  role: AriaRole;
-  mode: TMode;
+  /** How to link the popover to the trigger for accessibility. Defaults to 'description'. */
+  linkToTrigger?: TLinkToTrigger;
+  role?: AriaRole;
+  /** Popover mode. Defaults to 'auto'. */
+  mode?: TMode;
   testId?: string;
   /** Force usage of a specific JavaScript fallback strategy. If not set, uses native CSS Anchor Positioning when supported. */
   fallbackStrategy?: TFallbackStrategy;
+  /** Custom className. If not provided, default popover styling is applied. */
+  className?: string;
   onDismiss: () => void;
 }) {
   const ourRef = useRef<HTMLDivElement | null>(null);
   const id = useId();
 
-  // Need to wait for React to render the content
-  // into the element before showing it.
-  // Otherwise, the popover element will show before
-  // React has finished rendering the content into it.
   useLayoutEffect(() => {
     const popover = ourRef.current;
     const trigger = triggerRef.current;
@@ -87,27 +102,21 @@ export function Popover({
 
     const cleanupFns: TCleanupFn[] = [];
 
-    // Link the popover to the trigger for accessibility
-    cleanupFns.push(
-      setAttribute(trigger, { attribute: attribute[linkToTrigger], value: id }),
-    );
+    // Link the popover to the trigger for accessibility (if requested)
+    const ariaAttribute = attribute[linkToTrigger];
+    if (ariaAttribute) {
+      cleanupFns.push(
+        setAttribute(trigger, { attribute: ariaAttribute, value: id }),
+      );
+    }
 
     // Use native CSS Anchor Positioning if supported and no fallback strategy is forced
     const useNativePositioning = supportsAnchorPositioning() && !fallbackStrategy;
 
     if (useNativePositioning) {
-      // If the trigger already has an anchor name, we should
-      // use it and not override it.
-      // If we override an existing anchor name then the positioning
-      // of any existing popovers can be messed up.
-      // Note: TypeScript doesn't have types for anchorName yet as it's a new CSS property
       const existingAnchorName = trigger.style.getPropertyValue('anchor-name');
       const triggerAnchorName = existingAnchorName || `--anchor-name-${CSS.escape(id)}`;
 
-      // Once we set the anchor name on a trigger, we never change it.
-      // This is to prevent the case where two popovers are using the same
-      // trigger, and the first one opened closed - we don't want the second
-      // popover to lose its anchor name.
       cleanupFns.push(
         setStyle(trigger, { property: 'anchor-name', value: triggerAnchorName }),
         setStyle(popover, { property: 'position-anchor', value: triggerAnchorName }),
@@ -121,9 +130,12 @@ export function Popover({
       cleanupFns.push(bindFallbackPositioning(popover, trigger, position, strategy));
     }
 
-    // Show the popover
-    popover.showPopover();
-    cleanupFns.push(() => popover.hidePopover());
+    // Show the popover.
+    // The `source` option tells the browser which element triggered this popover,
+    // which helps establish the ancestor relationship for nested popovers.
+    // This is in addition to DOM nesting which is also checked.
+    // See: https://html.spec.whatwg.org/multipage/popover.html#dom-htmlelement-showpopover
+    (popover.showPopover as (options?: { source?: Element }) => void)({ source: trigger });
 
     return combine(...cleanupFns);
   }, [id, triggerRef, linkToTrigger, position, fallbackStrategy]);
@@ -140,9 +152,7 @@ export function Popover({
           onDismiss();
         }
       }}
-      className={css(
-        'rounded border border-gray-200 bg-white p-2 font-normal shadow-lg dark:border-gray-700 dark:bg-gray-800',
-      )}
+      className={css(className ?? defaultPopoverClassName)}
     >
       {children}
     </div>
