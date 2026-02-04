@@ -11,6 +11,7 @@ import {
   useRef,
 } from 'react';
 import invariant from 'tiny-invariant';
+import { bind } from 'bind-event-listener';
 import type { TCleanupFn } from '@/types';
 import { combine } from '@/utils/combine';
 import { css } from '@/utils/css';
@@ -61,6 +62,12 @@ const defaultPopoverClassName = tw`m-0 rounded border border-gray-200 bg-white p
  * - Pressing Escape closes only the topmost (innermost) popover.
  * - Light dismiss (clicking outside) closes the entire stack.
  *
+ * **Controlled vs Uncontrolled:**
+ * - **Controlled**: Set `autoShow={true}` (default). The popover shows when mounted
+ *   and expects to be conditionally rendered. Provide `onDismiss` to sync React state.
+ * - **Uncontrolled**: Set `autoShow={false}`. The popover is always in the DOM.
+ *   Use `popoverTargetElement` on the trigger to let the browser handle toggling.
+ *
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Popover_API/Using#nested_popovers
  */
 export function Popover({
@@ -75,6 +82,7 @@ export function Popover({
   fallbackStrategy,
   className,
   onDismiss,
+  autoShow = true,
 }: {
   ref?: Ref<HTMLDivElement>;
   triggerRef: RefObject<HTMLElement | null>;
@@ -90,7 +98,10 @@ export function Popover({
   fallbackStrategy?: TFallbackStrategy;
   /** Custom className. If not provided, default popover styling is applied. */
   className?: string;
-  onDismiss: () => void;
+  /** Callback when popover is dismissed. Required for controlled mode. */
+  onDismiss?: () => void;
+  /** If true (default), automatically shows the popover on mount. Set to false for uncontrolled mode. */
+  autoShow?: boolean;
 }) {
   const ourRef = useRef<HTMLDivElement | null>(null);
   const id = useId();
@@ -130,15 +141,24 @@ export function Popover({
       cleanupFns.push(bindFallbackPositioning(popover, trigger, position, strategy));
     }
 
-    // Show the popover.
-    // The `source` option tells the browser which element triggered this popover,
-    // which helps establish the ancestor relationship for nested popovers.
-    // This is in addition to DOM nesting which is also checked.
-    // See: https://html.spec.whatwg.org/multipage/popover.html#dom-htmlelement-showpopover
-    (popover.showPopover as (options?: { source?: Element }) => void)({ source: trigger });
+    if (autoShow) {
+      // Controlled mode: show the popover immediately.
+      // The `source` option tells the browser which element triggered this popover,
+      // which helps establish the ancestor relationship for nested popovers.
+      // See: https://html.spec.whatwg.org/multipage/popover.html#dom-htmlelement-showpopover
+      popover.showPopover({ source: trigger });
+    } else {
+      // Uncontrolled mode: bind click handler to toggle the popover.
+      cleanupFns.push(
+        bind(trigger, {
+          type: 'click',
+          listener: () => popover.togglePopover(),
+        }),
+      );
+    }
 
     return combine(...cleanupFns);
-  }, [id, triggerRef, linkToTrigger, position, fallbackStrategy]);
+  }, [id, triggerRef, linkToTrigger, position, fallbackStrategy, autoShow]);
 
   return (
     <div
@@ -149,7 +169,7 @@ export function Popover({
       popover={mode}
       onToggle={(event) => {
         if (event.newState === 'closed') {
-          onDismiss();
+          onDismiss?.();
         }
       }}
       className={css(className ?? defaultPopoverClassName)}

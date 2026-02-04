@@ -1,19 +1,16 @@
 'use client';
 
-import { useRef, useId, useEffect } from 'react';
+import { useRef } from 'react';
 import { ChevronRight, Info, Check } from 'lucide-react';
-import invariant from 'tiny-invariant';
-import { supportsAnchorPositioning } from '@/utils/supports-anchor-positioning';
-import { setStyle } from '@/utils/set-style';
-import { bindFallbackPositioning } from '@/utils/fallback-positioning';
-import { combine } from '@/utils/combine';
+import { Popover } from '@/components/popover';
+import { tw } from '@/utils/tw';
 
 /**
  * Demo page for popover="auto" behavior.
  *
  * Key behaviors being demonstrated:
  * 1. Light dismiss - clicking outside closes all popovers
- * 2. Escape key - should close only the topmost popover (if nesting works)
+ * 2. Escape key - closes only the topmost popover (due to DOM nesting)
  * 3. Nested popovers - child popover inside parent popover in DOM
  *
  * NO React state for open/closed - browser controls everything via popover="auto"
@@ -83,39 +80,7 @@ export default function PopoverAutoDemo() {
   );
 }
 
-/**
- * Hook to set up anchor positioning between a trigger and popover.
- */
-function useAnchorPositioning(
-  triggerRef: React.RefObject<HTMLElement | null>,
-  popoverRef: React.RefObject<HTMLElement | null>,
-  position: 'bottom' | 'right'
-) {
-  const id = useId();
-
-  useEffect(() => {
-    const popover = popoverRef.current;
-    const trigger = triggerRef.current;
-    if (!popover || !trigger) return;
-
-    const useNative = supportsAnchorPositioning();
-
-    if (useNative) {
-      const anchorName = `--menu-anchor-${CSS.escape(id)}`;
-      return combine(
-        setStyle(trigger, { property: 'anchor-name', value: anchorName }),
-        setStyle(popover, { property: 'position-anchor', value: anchorName }),
-      );
-    } else {
-      return bindFallbackPositioning(
-        popover,
-        trigger,
-        position === 'right' ? 'inline-end' : 'block-end',
-        'update-on-change'
-      );
-    }
-  }, [id, triggerRef, popoverRef, position]);
-}
+const menuClassName = tw`m-0 min-w-[180px] rounded-xl border border-gray-200 bg-white p-1 shadow-xl dark:border-gray-700 dark:bg-gray-800`;
 
 /**
  * The main nested menu demo.
@@ -124,56 +89,13 @@ function useAnchorPositioning(
  *   - Level 2: Share Menu (inside File Menu)
  *     - Level 3: Social Menu (inside Share Menu)
  *
- * All popovers are always in the DOM. Browser controls visibility via popovertarget.
+ * All popovers are always in the DOM. Browser controls visibility via popoverTargetElement.
  */
 function NestedMenuDemo() {
-  // Level 1
-  const level1Id = useId();
+  // Trigger refs
   const level1TriggerRef = useRef<HTMLButtonElement>(null);
-  const level1PopoverRef = useRef<HTMLDivElement>(null);
-
-  // Level 2
-  const level2Id = useId();
   const level2TriggerRef = useRef<HTMLButtonElement>(null);
-  const level2PopoverRef = useRef<HTMLDivElement>(null);
-
-  // Level 3
-  const level3Id = useId();
   const level3TriggerRef = useRef<HTMLButtonElement>(null);
-  const level3PopoverRef = useRef<HTMLDivElement>(null);
-
-  // Set up anchor positioning
-  useAnchorPositioning(level1TriggerRef, level1PopoverRef, 'bottom');
-  useAnchorPositioning(level2TriggerRef, level2PopoverRef, 'right');
-  useAnchorPositioning(level3TriggerRef, level3PopoverRef, 'right');
-
-  // Connect triggers to popovers via popoverTargetElement
-  useEffect(() => {
-    const level1Trigger = level1TriggerRef.current;
-    const level1Popover = level1PopoverRef.current;
-    const level2Trigger = level2TriggerRef.current;
-    const level2Popover = level2PopoverRef.current;
-    const level3Trigger = level3TriggerRef.current;
-    const level3Popover = level3PopoverRef.current;
-
-    invariant(level1Trigger && level1Popover);
-    invariant(level2Trigger && level2Popover);
-    invariant(level3Trigger && level3Popover);
-
-    // Use popoverTargetElement to establish trigger relationships
-    (level1Trigger as any).popoverTargetElement = level1Popover;
-    (level2Trigger as any).popoverTargetElement = level2Popover;
-    (level3Trigger as any).popoverTargetElement = level3Popover;
-
-    return () => {
-      (level1Trigger as any).popoverTargetElement = null;
-      (level2Trigger as any).popoverTargetElement = null;
-      (level3Trigger as any).popoverTargetElement = null;
-    };
-  }, []);
-
-  const positionBottom = { top: 'anchor(bottom)', left: 'anchor(start)', translate: '0 4px' };
-  const positionRight = { top: 'anchor(top)', left: 'anchor(right)', translate: '4px 0' };
 
   return (
     <div>
@@ -188,12 +110,12 @@ function NestedMenuDemo() {
       </button>
 
       {/* Level 1 Popover */}
-      <div
-        ref={level1PopoverRef}
-        id={level1Id}
-        popover="auto"
-        className="m-0 min-w-[180px] rounded-xl border border-gray-200 bg-white p-1 shadow-xl dark:border-gray-700 dark:bg-gray-800"
-        style={positionBottom}
+      <Popover
+        triggerRef={level1TriggerRef}
+        position="block-end"
+        autoShow={false}
+        className={menuClassName}
+        linkToTrigger="none"
       >
         <MenuHeader>File (Level 1)</MenuHeader>
         <MenuItem>New</MenuItem>
@@ -212,12 +134,12 @@ function NestedMenuDemo() {
         </button>
 
         {/* Level 2 Popover - INSIDE Level 1 Popover */}
-        <div
-          ref={level2PopoverRef}
-          id={level2Id}
-          popover="auto"
-          className="m-0 min-w-[180px] rounded-xl border border-gray-200 bg-white p-1 shadow-xl dark:border-gray-700 dark:bg-gray-800"
-          style={positionRight}
+        <Popover
+          triggerRef={level2TriggerRef}
+          position="inline-end"
+          autoShow={false}
+          className={menuClassName}
+          linkToTrigger="none"
         >
           <MenuHeader>Share (Level 2)</MenuHeader>
           <MenuItem>Copy Link</MenuItem>
@@ -235,23 +157,23 @@ function NestedMenuDemo() {
           </button>
 
           {/* Level 3 Popover - INSIDE Level 2 Popover */}
-          <div
-            ref={level3PopoverRef}
-            id={level3Id}
-            popover="auto"
-            className="m-0 min-w-[180px] rounded-xl border border-gray-200 bg-white p-1 shadow-xl dark:border-gray-700 dark:bg-gray-800"
-            style={positionRight}
+          <Popover
+            triggerRef={level3TriggerRef}
+            position="inline-end"
+            autoShow={false}
+            className={menuClassName}
+            linkToTrigger="none"
           >
             <MenuHeader>Social (Level 3)</MenuHeader>
             <MenuItem>Twitter</MenuItem>
             <MenuItem>LinkedIn</MenuItem>
             <MenuItem>Facebook</MenuItem>
-          </div>
-        </div>
+          </Popover>
+        </Popover>
 
         <MenuDivider />
         <MenuItem>Export</MenuItem>
-      </div>
+      </Popover>
     </div>
   );
 }
