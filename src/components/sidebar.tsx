@@ -15,6 +15,7 @@ import {
   FlaskConical,
   Bell,
   Layers,
+  Github,
 } from 'lucide-react';
 
 type SidebarContextType = {
@@ -182,13 +183,20 @@ function Sidebar() {
       </nav>
 
       {/* Footer */}
-      {!isCollapsed && (
-        <div className="border-t border-gray-200 p-3 dark:border-gray-800">
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Exploring CSS Anchor Positioning
-          </p>
-        </div>
-      )}
+      <div className="border-t border-gray-200 p-3 dark:border-gray-800">
+        <a
+          href="https://github.com/alexreardon/anchor-position-fallback-test"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`flex items-center gap-2 rounded-lg px-3 py-2 text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100 ${
+            isCollapsed ? 'justify-center' : ''
+          }`}
+          title={isCollapsed ? 'View on GitHub' : undefined}
+        >
+          <Github className="h-5 w-5" />
+          {!isCollapsed && <span className="text-sm">View on GitHub</span>}
+        </a>
+      </div>
     </aside>
   );
 }
